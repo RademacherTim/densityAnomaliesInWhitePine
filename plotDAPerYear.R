@@ -35,32 +35,36 @@ png (file = 'fig/numberOfAnomaliesPerYear.png', width = 720)
 par (mar = c (5, 5, 1, 5))
 plot (x = summaryData [['Year']], y = summaryData [['perBH']], col = 'white', 
       typ = 'l', las = 1, xlab = 'Year', ylim = c (0, 100), xlim = c (1993, 2018),
-      ylab = 'Percentage of annual rings with density anomaly', lwd = 0.8)
+      ylab = 'Percentage of annual rings with density anomaly (%)', lwd = 0.8)
 lines (x = summaryData [['Year']], y = summaryData [['perBH']], col = colours [1],
-       lwd = 0.8)
+       lwd = 3)
 points (x = summaryData [['Year']], y = summaryData [['perBH']], col = colours [1], 
         pch = 21, bg = 'white', lwd = 2)
 
 # Add frequency in cores near branches
 #----------------------------------------------------------------------------------------
 lines (x = summaryData [['Year']], y = summaryData [['perBranch']], col = colours [2],
-       lwd = 0.8)
+       lwd = 3)
 points (x = summaryData [['Year']], y = summaryData [['perBranch']], col = colours [2], 
         lwd = 2, pch = 21, bg = 'white')
 
 # Add frequency in cookies from the top of trees
 #----------------------------------------------------------------------------------------
 lines (x = summaryData [['Year']], y = summaryData [['perTop']], col = colours [3],
-       lwd = 0.8)
+       lwd = 3)
 points (x = summaryData [['Year']], y = summaryData [['perTop']], col = colours [3], 
         pch = 21, bg = 'white', lwd = 2)
 
 # Add a legend 
 #----------------------------------------------------------------------------------------
-legend (x = 1993, y = 100, bg = 'white', box.lty = 0, pch = c (21, 21, 21, NA), 
-        col = c (colours, '#999999'), 
-        legend = c ('breast height', 'near-branch', 'top-of-tree', 'sample size'), 
-        lwd = c (0.8, 0.8, 0.8, 1), lty = c (1, 1, 1, 2))
+legend (x = 1994, y = 100, box.lty = 0, pch = 21, col = colours, 
+        legend = c ('breast height', 'near-branch', 'top-of-tree'), lwd = 3, lty = 1,
+        bg = 'transparent', pt.bg = 'white', pt.lwd = 2)
+legend (x = 1992.5, y = 100, box.lty = 0, col = colours, 
+        legend = c ('', '', ''), lwd = 1, lty = 2,
+        bg = 'transparent')
+text (x = 1993.3, y = 103, pos = 1, labels = 'n')
+text (x = 1994.5, y = 103, pos = 1, labels = '%')
 
 # Add line for the sample size at BH
 #----------------------------------------------------------------------------------------
@@ -81,7 +85,7 @@ lines (x = summaryData [['Year']], y = summaryData [['nTop']], col = colours [3]
 # Add second y-axis
 #----------------------------------------------------------------------------------------
 axis (side = 4, las = 1)
-mtext (side = 4, line = 3, text = 'Sample size')
+mtext (side = 4, line = 3, text = 'Sample size (n)')
 
 # Close ploting device
 #----------------------------------------------------------------------------------------
