@@ -26,42 +26,32 @@ summaryData <- data %>%
           perTop = sumTop / nTop * 100) %>% 
   filter (Year < 2019)
 
+# Define width of the png files
+#----------------------------------------------------------------------------------------
+PNGwidth <- 1020
+
 # Open file for ploting
 #----------------------------------------------------------------------------------------
-png (file = 'fig/numberOfAnomaliesPerYear.png', width = 720)
+png (file = 'fig/numberOfAnomaliesPerYearBH.png', width = PNGwidth)
 
 # Plot the frequency of microdensity anomalies per year ring
 #----------------------------------------------------------------------------------------
 par (mar = c (5, 5, 1, 5))
 plot (x = summaryData [['Year']], y = summaryData [['perBH']], col = 'white', 
-      typ = 'l', las = 1, xlab = 'Year', ylim = c (0, 100), xlim = c (1993, 2018),
-      ylab = 'Percentage of annual rings with density anomaly (%)', lwd = 0.8)
+      typ = 'l', las = 1, xlab = 'Year', ylim = c (0, 105), xlim = c (1993, 2018),
+      ylab = 'Percentage of annual rings with density anomaly (%)')
 lines (x = summaryData [['Year']], y = summaryData [['perBH']], col = colours [1],
-       lwd = 3)
+       lwd = 4)
 points (x = summaryData [['Year']], y = summaryData [['perBH']], col = colours [1], 
-        pch = 21, bg = 'white', lwd = 2)
-
-# Add frequency in cores near branches
-#----------------------------------------------------------------------------------------
-lines (x = summaryData [['Year']], y = summaryData [['perBranch']], col = colours [2],
-       lwd = 3)
-points (x = summaryData [['Year']], y = summaryData [['perBranch']], col = colours [2], 
-        lwd = 2, pch = 21, bg = 'white')
-
-# Add frequency in cookies from the top of trees
-#----------------------------------------------------------------------------------------
-lines (x = summaryData [['Year']], y = summaryData [['perTop']], col = colours [3],
-       lwd = 3)
-points (x = summaryData [['Year']], y = summaryData [['perTop']], col = colours [3], 
-        pch = 21, bg = 'white', lwd = 2)
+        pch = 21, bg = 'white', lwd = 4)
 
 # Add a legend 
 #----------------------------------------------------------------------------------------
-legend (x = 1994, y = 100, box.lty = 0, pch = 21, col = colours, 
-        legend = c ('breast height', 'near-branch', 'top-of-tree'), lwd = 3, lty = 1,
+legend (x = 1994, y = 100, box.lty = 0, pch = 21, col = colours [1], 
+        legend = 'breast height', lwd = 4, lty = 1,
         bg = 'transparent', pt.bg = 'white', pt.lwd = 2)
-legend (x = 1992.5, y = 100, box.lty = 0, col = colours, 
-        legend = c ('', '', ''), lwd = 1, lty = 2,
+legend (x = 1992.5, y = 100, box.lty = 0, col = colours [1], 
+        legend = '', lwd = 3, lty = 2,
         bg = 'transparent')
 text (x = 1993.3, y = 103, pos = 1, labels = 'n')
 text (x = 1994.5, y = 103, pos = 1, labels = '%')
@@ -70,17 +60,95 @@ text (x = 1994.5, y = 103, pos = 1, labels = '%')
 #----------------------------------------------------------------------------------------
 par (new = TRUE)
 plot (x = summaryData [['Year']], y = summaryData [['nBH']], col = colours [1], lty = 2, 
-      axes = 'n', typ = 'l', xlab = '', ylab = '')
+      axes = FALSE, typ = 'l', xlab = '', ylab = '', lwd = 3, ylim = c (0, 41))
+
+# Add second y-axis
+#----------------------------------------------------------------------------------------
+axis (side = 4, las = 1)
+mtext (side = 4, line = 3, text = 'Sample size (n)')
+
+# Close ploting device
+#----------------------------------------------------------------------------------------
+dev.off ()
+
+# Open file for ploting
+#----------------------------------------------------------------------------------------
+png (file = 'fig/numberOfAnomaliesPerYearNearBranch.png', width = PNGwidth)
+
+# Plot the frequency of microdensity anomalies per year ring
+#----------------------------------------------------------------------------------------
+par (mar = c (5, 5, 1, 5))
+plot (x = summaryData [['Year']], y = summaryData [['perBH']], col = 'white', 
+      typ = 'l', las = 1, xlab = 'Year', ylim = c (0, 105), xlim = c (1993, 2018),
+      ylab = 'Percentage of annual rings with density anomaly (%)')
+
+# Add frequency in cores near branches
+#----------------------------------------------------------------------------------------
+lines (x = summaryData [['Year']], y = summaryData [['perBranch']], col = colours [2],
+       lwd = 4)
+points (x = summaryData [['Year']], y = summaryData [['perBranch']], col = colours [2], 
+        lwd = 4, pch = 21, bg = 'white')
+
+# Add a legend 
+#----------------------------------------------------------------------------------------
+legend (x = 1994, y = 100, box.lty = 0, pch = 21, col = colours [2], 
+        legend = 'near-branch', lwd = 4, lty = 1,
+        bg = 'transparent', pt.bg = 'white', pt.lwd = 2)
+legend (x = 1992.5, y = 100, box.lty = 0, col = colours [2], 
+        legend = '', lwd = 2, lty = 3,
+        bg = 'transparent')
+text (x = 1993.3, y = 103, pos = 1, labels = 'n')
+text (x = 1994.5, y = 103, pos = 1, labels = '%')
 
 # Add line for the sample size near branch
 #----------------------------------------------------------------------------------------
-lines (x = summaryData [['Year']], y = summaryData [['nBranch']], col = colours [2], 
-       lty = 2)
+par (new = TRUE)
+plot (x = summaryData [['Year']], y = summaryData [['nBranch']], col = colours [2], lty = 2, 
+      axes = FALSE, typ = 'l', xlab = '', ylab = '', lwd = 3, ylim = c (0, 41))
 
-# Add line for the sample size at top-of-tree
+# Add second y-axis
 #----------------------------------------------------------------------------------------
-lines (x = summaryData [['Year']], y = summaryData [['nTop']], col = colours [3], 
-       lty = 2)
+axis (side = 4, las = 1)
+mtext (side = 4, line = 3, text = 'Sample size (n)')
+
+# Close ploting device
+#----------------------------------------------------------------------------------------
+dev.off ()
+
+# Open file for ploting
+#----------------------------------------------------------------------------------------
+png (file = 'fig/numberOfAnomaliesPerYearTopOfTree.png', width = PNGwidth)
+
+# Plot the frequency of microdensity anomalies per year ring
+#----------------------------------------------------------------------------------------
+par (mar = c (5, 5, 1, 5))
+plot (x = summaryData [['Year']], y = summaryData [['perBH']], col = 'white', 
+      typ = 'l', las = 1, xlab = 'Year', ylim = c (0, 105), xlim = c (1993, 2018),
+      ylab = 'Percentage of annual rings with density anomaly (%)')
+
+# Add frequency in cookies from the top of trees
+#----------------------------------------------------------------------------------------
+lines (x = summaryData [['Year']], y = summaryData [['perTop']], col = colours [3],
+       lwd = 4)
+points (x = summaryData [['Year']], y = summaryData [['perTop']], col = colours [3], 
+        pch = 21, bg = 'white', lwd = 4)
+
+# Add a legend 
+#----------------------------------------------------------------------------------------
+legend (x = 1994, y = 100, box.lty = 0, pch = 21, col = colours [3], 
+        legend = 'top-of-tree', lwd = 4, lty = 1,
+        bg = 'transparent', pt.bg = 'white', pt.lwd = 2)
+legend (x = 1992.5, y = 100, box.lty = 0, col = colours [3], 
+        legend = '', lwd = 3, lty = 2,
+        bg = 'transparent')
+text (x = 1993.3, y = 103, pos = 1, labels = 'n')
+text (x = 1994.5, y = 103, pos = 1, labels = '%')
+
+# Add line for the sample size near branch
+#----------------------------------------------------------------------------------------
+par (new = TRUE)
+plot (x = summaryData [['Year']], y = summaryData [['nTop']], col = colours [3], lty = 2, 
+      axes = FALSE, typ = 'l', xlab = '', ylab = '', lwd = 3, ylim = c (0, 41))
 
 # Add second y-axis
 #----------------------------------------------------------------------------------------
@@ -92,3 +160,4 @@ mtext (side = 4, line = 3, text = 'Sample size (n)')
 dev.off ()
 
 #========================================================================================
+
