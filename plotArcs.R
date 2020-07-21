@@ -122,13 +122,13 @@ abline (modWoodAge, col = '#FFA500', lwd = 2, lty = 2)
 
 # Wrangle data to get average and standard deviation of arc by ring width
 #----------------------------------------------------------------------------------------
-temp1 <- data %>% filter (Year < 2019) %>% filter (DABH_1 == 1) %>% 
+temp1 <- data %>% filter (Year < 2019) %>% filter (DABH_1 %in% 1:2) %>% 
   mutate (RingWidth = RingWidthBH_1, Arc = ArcBH) 
-temp2 <- data %>% filter (Year < 2019) %>% filter (DABH_2 == 1) %>% 
+temp2 <- data %>% filter (Year < 2019) %>% filter (DABH_2 %in% 1:2) %>% 
   mutate (RingWidth = RingWidthBH_2, Arc = ArcBH) 
-temp3 <- data %>% filter (Year < 2019) %>% filter (DA2010_1 == 1) %>% 
+temp3 <- data %>% filter (Year < 2019) %>% filter (DA2010_1 %in% 1:2) %>% 
   mutate (RingWidth = RingWidth2010_1, Arc = Arc2010)
-temp4 <- data %>% filter (Year < 2019) %>% filter (DA2010_2 == 1) %>% 
+temp4 <- data %>% filter (Year < 2019) %>% filter (DA2010_2 %in% 1:2) %>% 
   mutate (RingWidth = RingWidth2010_2, Arc = Arc2010) 
 temp <- rbind (temp1, temp2, temp3, temp4); rm (temp1, temp2, temp3, temp4)
 
