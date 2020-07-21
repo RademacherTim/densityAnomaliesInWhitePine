@@ -29,7 +29,7 @@ drive_download (file = as_id (fileID), verbose = FALSE, overwrite = TRUE); rm (f
 
 # Read and delete downloaded data sheet
 #----------------------------------------------------------------------------------------
-data <- read_excel (path = 'Micro-density Anomaly Master Sheet.xlsx', na = 'NA')
+data <- read_excel (path = 'Density Anomaly Data Master Sheet.xlsx', na = 'NA')
 
 # Clean up
 #----------------------------------------------------------------------------------------

@@ -13,15 +13,18 @@ source ('plotingFunctions.R')
 # Wrangle data to get frequency per year
 #----------------------------------------------------------------------------------------
 summaryData <- data %>%
-  mutate (MDABH     = ifelse (MDABH1     == 1 | MDABH2     == 1, 1, 0), 
-          MDABranch = ifelse (MDABranch1 == 1 | MDABranch2 == 1, 1, 0),
-          MDATop    = ifelse (MDA2010_1  == 1 | MDA2010_2  == 1, 1, 0)) %>% 
-  group_by (Year) %>% summarise (sumBH     = sum (MDABH,     na.rm = TRUE),
-                                 nBH       = sum (!is.na (MDABH)),
-                                 sumBranch = sum (MDABranch, na.rm = TRUE),
-                                 nBranch   = sum (!is.na (MDABranch)),
-                                 sumTop    = sum (MDATop,    na.rm = TRUE),
-                                 nTop      = sum (!is.na (MDATop))) %>%
+  mutate (DABH     = ifelse (DABH_1     %in% 1:2 | DABH_2     %in% 1:2, 1, 
+                             ifelse (is.na (DABH_1) | is.na (DABH_2), NA, 0)), 
+          DABranch = ifelse (DABranch_1 %in% 1:2 | DABranch_2 %in% 1:2, 1, 
+                             ifelse (is.na (DABranch_1) | is.na (DABranch_2), NA, 0)),
+          DATop    = ifelse (DA2010_1   %in% 1:2 | DA2010_2   %in% 1:2, 1, 
+                             ifelse (is.na (DA2010_1) | is.na (DA2010_2), NA, 0))) %>% 
+  group_by (Year) %>% summarise (sumBH     = sum (DABH,     na.rm = TRUE),
+                                 nBH       = sum (!is.na (DABH)),
+                                 sumBranch = sum (DABranch, na.rm = TRUE),
+                                 nBranch   = sum (!is.na (DABranch)),
+                                 sumTop    = sum (DATop,    na.rm = TRUE),
+                                 nTop      = sum (!is.na (DATop))) %>%
   mutate (perBH  = sumBH  / nBH  * 100, perBranch = sumBranch / nBranch * 100,
           perTop = sumTop / nTop * 100) %>% 
   filter (Year < 2019)
