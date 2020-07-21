@@ -12,22 +12,46 @@ source ('plotingFunctions.R')
 
 # Wrangle data to get density distribution for when they occur
 #----------------------------------------------------------------------------------------
-temp1 <- data %>% filter (MDABH1 == 1) %>% mutate (perc = PercMDABHPos1) %>% 
+temp1  <- data %>% filter (DABH_1 == 1) %>% 
+  mutate (perc = PercentageDABH_1.1) %>% 
   select (perc) %>% filter (!is.na (perc))
-temp2 <- data %>% filter (MDABH2 == 1) %>% mutate (perc = PercMDABHPos2) %>% 
+temp2  <- data %>% filter (DABH_2 == 1) %>%
+  mutate (perc = PercentageDABH_2.1) %>% 
   select (perc) %>% filter (!is.na (perc))
-temp3 <- data %>% filter (MDABranch1 == 1) %>% mutate (perc = PercMDABranch1) %>% 
+temp3  <- data %>% filter (DABranch_1 == 1) %>% 
+  mutate (perc = PercentageDABranch_1.1) %>% 
   select (perc) %>% filter (!is.na (perc))
-temp4 <- data %>% filter (MDABranch2 == 1) %>% mutate (perc = PercMDABranch2) %>% 
+temp4  <- data %>% filter (DABranch_2 == 1) %>% 
+  mutate (perc = PercentageDABranch_2.1) %>% 
   select (perc) %>% filter (!is.na (perc))
-temp5 <- data %>% filter (MDA2010_1 == 1) %>% mutate (perc = PercMDA2010.1) %>% 
+temp5  <- data %>% filter (DA2010_1 == 1) %>% 
+  mutate (perc = PercentageDA2010_1.1) %>% 
   select (perc) %>% filter (!is.na (perc))
-temp6 <- data %>% filter (MDA2010_2 == 1) %>% mutate (perc = PercMDA2010.2) %>% 
+temp6  <- data %>% filter (DA2010_2 == 1) %>%
+  mutate (perc = PercentageDA2010_2.1) %>% 
   select (perc) %>% filter (!is.na (perc))
-percentagesAll     <- rbind (temp1, temp2, temp3, temp4, temp5, temp6) [['perc']] 
-percentagesBH      <- rbind (temp1, temp2) [['perc']]
-percentagesBranch  <- rbind (temp3, temp4) [['perc']]
-percentages2010    <- rbind (temp5, temp6) [['perc']]
+temp7  <- data %>% filter (DABH_1 == 2) %>% 
+  mutate (perc = PercentageDABH_1.2) %>% 
+  select (perc) %>% filter (!is.na (perc))
+temp8  <- data %>% filter (DABH_2 == 2) %>%
+  mutate (perc = PercentageDABH_2.2) %>% 
+  select (perc) %>% filter (!is.na (perc))
+temp9  <- data %>% filter (DABranch_1 == 2) %>% 
+  mutate (perc = PercentageDABranch_1.2) %>% 
+  select (perc) %>% filter (!is.na (perc))
+temp10 <- data %>% filter (DABranch_2 == 2) %>% 
+  mutate (perc = PercentageDABranch_2.2) %>% 
+  select (perc) %>% filter (!is.na (perc))
+temp11 <- data %>% filter (DA2010_1 == 2) %>% 
+  mutate (perc = PercentageDA2010_1.2) %>% 
+  select (perc) %>% filter (!is.na (perc))
+temp12 <- data %>% filter (DA2010_2 == 2) %>% 
+  mutate (perc = PercentageDA2010_2.2) %>% 
+  select (perc) %>% filter (!is.na (perc))
+percentagesAll     <- rbind (temp1, temp2, temp3, temp4, temp5, temp6, temp7, temp8, temp9, temp10, temp11, temp12) [['perc']] 
+percentagesBH      <- rbind (temp1, temp2, temp7,  temp8)  [['perc']]
+percentagesBranch  <- rbind (temp3, temp4, temp9,  temp10) [['perc']]
+percentages2010    <- rbind (temp5, temp6, temp11, temp12) [['perc']]
 rhoAll    <- density (percentagesAll)
 rhoBH     <- density (percentagesBH)
 rhoBranch <- density (percentagesBranch)
@@ -41,7 +65,7 @@ png (file = 'fig/withinRingDADistribution.png')
 #----------------------------------------------------------------------------------------
 par (mar = c (5, 5, 1, 1))
 plot (rhoAll, xlim = c (0, 100), ylim = c (0, 0.055), xlab = 'Percentage ring width (%)',
-      ylab = 'Density distribution', main = '', lwd = 3, col = 'white', axes = FALSE)
+      ylab = 'Density distribution of position of density anomalies', main = '', lwd = 3, col = 'white', axes = FALSE)
 axis (1)
 axis (2, las = 1)
 lines (rhoBH,     lwd = 3, col = colours [1])
