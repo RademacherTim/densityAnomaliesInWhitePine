@@ -25,9 +25,11 @@ yearlyData <- data %>% filter (Year < 2019) %>% group_by (Year) %>%
 # Plot arc by year
 #----------------------------------------------------------------------------------------
 par (mar = c (5, 5, 1, 1))
-plot (x = yearlyData [['Year']], y = yearlyData [['meanArcBH']], las = 1,
-      xlab = 'Year', ylab = expression (paste ('arc (', degree,')')), ylim = c (0, 380),
-      col = colours [1], pch = 19)
+plot (x = yearlyData [['Year']], y = yearlyData [['meanArcBH']], 
+      xlab = 'Year', ylab = expression (paste ('arc of density anomalies (', degree,')')), 
+      ylim = c (0, 380), col = colours [1], pch = 19, axes = FALSE)
+axis (1)
+axis (2, at = seq (0, 360, by = 60), las = 1)
 arrows (x0 = yearlyData [['Year']], 
         y0 = yearlyData [['meanArcBH']] - yearlyData [['seArcBH']],
         y1 = yearlyData [['meanArcBH']] + yearlyData [['seArcBH']], angle = 90, 
@@ -38,6 +40,8 @@ arrows (x0 = yearlyData [['Year']],
         y0 = yearlyData [['meanArc2010']] - yearlyData [['seArc2010']],
         y1 = yearlyData [['meanArc2010']] + yearlyData [['seArc2010']], angle = 90, 
         length = 0.05, code = 3, col = colours [3])
+legend (x = 2012, y = 390, legend = c ('breast height','top-of-tree'), box.lty = 0, 
+        col = colours [c(1,3)], pch = 19)
 
 # Test for effect of year on arc of density anomaly
 #----------------------------------------------------------------------------------------
@@ -59,9 +63,11 @@ treeData <- data %>% filter (Year < 2019) %>% group_by (TreeID) %>%
 # Plot arc by tree
 #----------------------------------------------------------------------------------------
 par (mar = c (5, 5, 1, 1))
-plot (x = treeData [['TreeID']], y = treeData [['meanArcBH']], las = 1,
-      xlab = 'Tree', ylab = expression (paste ('arc (', degree,')')), ylim = c (0, 380),
-      col = colours [1], pch = 19)
+plot (x = treeData [['TreeID']], y = treeData [['meanArcBH']], axes = FALSE,
+      xlab = 'Tree', ylab = expression (paste ('arc of density anomalies (', degree,')')), 
+      ylim = c (0, 380), col = colours [1], pch = 19)
+axis (1)
+axis (2, at = seq (0, 360, by = 60), las = 1)
 arrows (x0 = treeData [['TreeID']], 
         y0 = treeData [['meanArcBH']] - treeData [['seArcBH']],
         y1 = treeData [['meanArcBH']] + treeData [['seArcBH']], angle = 90, 
@@ -84,21 +90,24 @@ anova (modTree2010)
 
 # Wrangle data to get average and standard deviation of arc by wood age
 #----------------------------------------------------------------------------------------
-temp1 <- data %>% filter (Year < 2019) %>% filter (MDABH1 == 1 | MDABH2 == 1) %>% 
+temp1 <- data %>% filter (Year < 2019) %>% filter (DABH_1 == 1 | DABH_2 == 1) %>% 
   mutate (WoodAge = WoodAgeBH, Arc = ArcBH) 
-temp2 <- data %>% filter (Year < 2019) %>% filter (MDA2010_1 == 1 | MDA2010_2 == 1) %>% 
+temp2 <- data %>% filter (Year < 2019) %>% filter (DA2010_1 == 1 | DA2010_2 == 1) %>% 
   mutate (WoodAge = WoodAge2010, Arc = Arc2010)
 temp <- rbind (temp1, temp2); rm (temp1, temp2)
 woodAgeData <- temp %>% group_by (WoodAge) %>% 
   summarise (meanArc = mean (Arc, na.rm = TRUE),
              seArc = se (Arc))
   
-# Plot arc by tree
+# Plot arc by wood age
 #----------------------------------------------------------------------------------------
 par (mar = c (5, 5, 1, 1))
-plot (x = woodAgeData [['WoodAge']], y = woodAgeData [['meanArc']], las = 1,
-      xlab = 'Wood age (years)', ylab = expression (paste ('arc (', degree,')')), ylim = c (0, 380),
+plot (x = woodAgeData [['WoodAge']], y = woodAgeData [['meanArc']], axes = FALSE,
+      xlab = 'Wood age (years)', ylab = expression (paste ('arc of density anomalies (', degree,')')), 
+      xlim = c (0, 25), ylim = c (0, 380),
       col = '#FFA500', pch = 19)
+axis (1, at = seq (0, 25, by = 5))
+axis (2, at = seq (0, 360, by = 60), las = 1)
 arrows (x0 = woodAgeData [['WoodAge']], 
         y0 = woodAgeData [['meanArc']] - woodAgeData [['seArc']],
         y1 = woodAgeData [['meanArc']] + woodAgeData [['seArc']], angle = 90, 
@@ -113,22 +122,25 @@ abline (modWoodAge, col = '#FFA500', lwd = 2, lty = 2)
 
 # Wrangle data to get average and standard deviation of arc by ring width
 #----------------------------------------------------------------------------------------
-temp1 <- data %>% filter (Year < 2019) %>% filter (MDABH1 == 1) %>% 
-  mutate (RingWidth = RingWidthBH1, Arc = ArcBH) 
-temp2 <- data %>% filter (Year < 2019) %>% filter (MDABH2 == 1) %>% 
-  mutate (RingWidth = RingWidthBH2, Arc = ArcBH) 
-temp3 <- data %>% filter (Year < 2019) %>% filter (MDA2010_1 == 1) %>% 
+temp1 <- data %>% filter (Year < 2019) %>% filter (DABH_1 == 1) %>% 
+  mutate (RingWidth = RingWidthBH_1, Arc = ArcBH) 
+temp2 <- data %>% filter (Year < 2019) %>% filter (DABH_2 == 1) %>% 
+  mutate (RingWidth = RingWidthBH_2, Arc = ArcBH) 
+temp3 <- data %>% filter (Year < 2019) %>% filter (DA2010_1 == 1) %>% 
   mutate (RingWidth = RingWidth2010_1, Arc = Arc2010)
-temp4 <- data %>% filter (Year < 2019) %>% filter (MDA2010_2 == 1) %>% 
+temp4 <- data %>% filter (Year < 2019) %>% filter (DA2010_2 == 1) %>% 
   mutate (RingWidth = RingWidth2010_2, Arc = Arc2010) 
 temp <- rbind (temp1, temp2, temp3, temp4); rm (temp1, temp2, temp3, temp4)
 
 # Plot arc by tree
 #----------------------------------------------------------------------------------------
 par (mar = c (5, 5, 1, 1))
-plot (x = temp [['RingWidth']], y = temp [['Arc']], las = 1,
-      xlab = 'Ring width (mm)', ylab = expression (paste ('arc (', degree,')')), ylim = c (0, 380),
+plot (x = temp [['RingWidth']], y = temp [['Arc']], axes = FALSE,
+      xlab = 'Ring width (mm)', ylab = expression (paste ('arc of density anomalies (', degree,')')), 
+      xlim = c (0, 8), ylim = c (0, 380),
       col = '#FFA500', pch = 19)
+axis (1)
+axis (2, at = seq (0, 360, 60), las = 1)
 
 # Test for effect of wood age on arc of density anomaly 
 #----------------------------------------------------------------------------------------
