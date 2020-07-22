@@ -18,18 +18,31 @@ temp <- data %>% filter (Year < 2019) %>%
   
 temp1 <- temp %>% group_by (WoodAgeBH) %>% 
   summarise (sumDABH = sum (DABH, na.rm = TRUE), nDABH = sum (!is.na (DABH))) %>% 
-  mutate (perc = (sumDABH / nDABH) * 100.0)
+  mutate (perc = (sumDABH / nDABH) * 100.0, WoodAge = WoodAgeBH)
 
 temp2 <- temp %>% group_by (WoodAgeBranch) %>% 
   summarise (sumDABranch = sum (DABranch, na.rm = TRUE), nDABranch = sum (!is.na (DABranch))) %>% 
-  mutate (perc = (sumDABranch / nDABranch) * 100.0)
+  mutate (perc = (sumDABranch / nDABranch) * 100.0, WoodAge = WoodAgeBranch)
 
 temp3 <- temp %>% group_by (WoodAge2010) %>% 
   summarise (sumDA2010 = sum (DA2010, na.rm = TRUE), nDA2010 = sum (!is.na (DA2010))) %>% 
-  mutate (perc = (sumDA2010 / nDA2010) * 100.0)
+  mutate (perc = (sumDA2010 / nDA2010) * 100.0, WoodAge = WoodAge2010)
 
-plot (temp1 [['WoodAgeBH']], temp1 [['perc']])
-plot (temp2 [['WoodAgeBranch']], temp2 [['perc']])
-plot (temp3 [['WoodAge2010']], temp3 [['perc']])
+tmp1 <- temp %>% filter (!is.na (DABH)) %>% mutate (DA = DABH, WoodAge = WoodAgeBH) %>% select (DA, WoodAge)
+tmp2 <- temp %>% filter (!is.na (DABranch)) %>% mutate (DA = DABranch, WoodAge = WoodAgeBranch) %>% select (DA, WoodAge)
+tmp3 <- temp %>% filter (!is.na (DA2010)) %>% mutate (DA = DA2010, WoodAge = WoodAge2010) %>% select (DA, WoodAge)
+tmp <- rbind (tmp1, tmp2, tmp3) %>% group_by (WoodAge) %>% summarise (sumDA = sum (DA, na.rm = TRUE), nDA = sum (!is.na (DA)), perc = (sumDA / nDA) * 100)
+
+# Plot frequency of occurence over age of the wood
+#----------------------------------------------------------------------------------------
+plot (x = tmp [['WoodAge']], y = tmp [['perc']], axes = FALSE, ylim = c (0, 100), 
+      typ = 'l', col = 'white', xlab = 'Wood age (years)', 
+      ylab = 'Frequency of density anomalies (%)', xlim = c (0, 25), lwd = 2)
+axis (1, at = seq (0, 25, by = 5))
+axis (2, las = 1)
+lines (x = temp1 [['WoodAgeBH']],     y = temp1 [['perc']], col = colours [1], lwd = 2)
+lines (x = temp2 [['WoodAgeBranch']], y = temp2 [['perc']], col = colours [2], lwd = 2)
+lines (x = temp3 [['WoodAge2010']],   y = temp3 [['perc']], col = colours [3], lwd = 2)
+lines (x = tmp   [['WoodAge']],       y = tmp   [['perc']], col = '#666666', lwd = 3)
 
 #========================================================================================
