@@ -9,6 +9,7 @@ library ('caTools')
 library ('glmnet')
 library ('dominanceanalysis')
 library ('boot')
+library ('lme4')
 
 # Download and read the data
 #----------------------------------------------------------------------------------------
