@@ -5,6 +5,7 @@
 # Download and read the data
 #----------------------------------------------------------------------------------------
 source ('readGrowthData.R')
+library ('tidyverse')
 
 # Wrangle data to get frequency over wood age for breat height, near-branch and top-of-tree
 #----------------------------------------------------------------------------------------
@@ -35,9 +36,10 @@ tmp <- rbind (tmp1, tmp2, tmp3) %>% group_by (WoodAge) %>% summarise (sumDA = su
 
 # Plot frequency of occurence over age of the wood
 #----------------------------------------------------------------------------------------
+par (mar = c (5, 5, 1, 1))
 plot (x = tmp [['WoodAge']], y = tmp [['perc']], axes = FALSE, ylim = c (0, 100), 
       typ = 'l', col = 'white', xlab = 'Wood age (years)', 
-      ylab = 'Frequency of density anomalies (%)', xlim = c (0, 25), lwd = 2)
+      ylab = 'Percentage of density anomalies (%)', xlim = c (0, 25), lwd = 2)
 axis (1, at = seq (0, 25, by = 5))
 axis (2, las = 1)
 lines (x = temp1 [['WoodAgeBH']],     y = temp1 [['perc']], col = colours [1], lwd = 2)
@@ -45,4 +47,8 @@ lines (x = temp2 [['WoodAgeBranch']], y = temp2 [['perc']], col = colours [2], l
 lines (x = temp3 [['WoodAge2010']],   y = temp3 [['perc']], col = colours [3], lwd = 2)
 lines (x = tmp   [['WoodAge']],       y = tmp   [['perc']], col = '#666666', lwd = 3)
 
+# Add a legend 
+#----------------------------------------------------------------------------------------
+legend (x = 15, y = 100, box.lty = 0, col = c (colours, '#666666'), lwd = c (rep (2, 3), 3),
+        legend = c ('breast height','near-branch','top-of-tree','all'))
 #========================================================================================
