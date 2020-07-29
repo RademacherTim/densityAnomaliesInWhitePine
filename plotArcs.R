@@ -16,7 +16,7 @@ source ('plotingFunctions.R')
 
 # Wrangle data to get average and sd deviation of arc by year
 #----------------------------------------------------------------------------------------
-yearlyData <- data %>% filter (Year < 2019) %>% group_by (Year) %>% 
+yearlyData <- data %>% filter (Year < 2017) %>% group_by (Year) %>% 
   summarise (meanArcBH = mean (ArcBH, na.rm = TRUE),
              seArcBH   = se   (ArcBH),
              meanArc2010 = mean (Arc2010, na.rm = TRUE),
@@ -27,7 +27,7 @@ yearlyData <- data %>% filter (Year < 2019) %>% group_by (Year) %>%
 par (mar = c (5, 5, 1, 1))
 plot (x = yearlyData [['Year']], y = yearlyData [['meanArcBH']], 
       xlab = 'Year', ylab = expression (paste ('arc of density anomalies (', degree,')')), 
-      ylim = c (0, 380), col = colours [1], pch = 19, axes = FALSE)
+      xlim = c (1997, 2017), ylim = c (0, 380), col = colours [1], pch = 19, axes = FALSE)
 axis (1)
 axis (2, at = seq (0, 360, by = 60), las = 1)
 arrows (x0 = yearlyData [['Year']], 
@@ -54,7 +54,7 @@ anova (modYear2010)
 
 # Wrangle data to get average and standard deviation of arc by tree
 #----------------------------------------------------------------------------------------
-treeData <- data %>% filter (Year < 2019) %>% group_by (TreeID) %>% 
+treeData <- data %>% filter (Year < 2017) %>% group_by (TreeID) %>% 
   summarise (meanArcBH = mean (ArcBH, na.rm = TRUE),
              seArcBH   = se   (ArcBH),
              meanArc2010 = mean (Arc2010, na.rm = TRUE),
@@ -90,9 +90,9 @@ anova (modTree2010)
 
 # Wrangle data to get average and standard deviation of arc by wood age
 #----------------------------------------------------------------------------------------
-temp1 <- data %>% filter (Year < 2019) %>% filter (DABH_1 == 1 | DABH_2 == 1) %>% 
+temp1 <- data %>% filter (Year < 2017) %>% filter (DABH_1 == 1 | DABH_2 == 1) %>% 
   mutate (WoodAge = WoodAgeBH, Arc = ArcBH) 
-temp2 <- data %>% filter (Year < 2019) %>% filter (DA2010_1 == 1 | DA2010_2 == 1) %>% 
+temp2 <- data %>% filter (Year < 2017) %>% filter (DA2010_1 == 1 | DA2010_2 == 1) %>% 
   mutate (WoodAge = WoodAge2010, Arc = Arc2010)
 temp <- rbind (temp1, temp2); rm (temp1, temp2)
 woodAgeData <- temp %>% group_by (WoodAge) %>% 
@@ -122,13 +122,13 @@ abline (modWoodAge, col = '#FFA500', lwd = 2, lty = 2)
 
 # Wrangle data to get average and standard deviation of arc by ring width
 #----------------------------------------------------------------------------------------
-temp1 <- data %>% filter (Year < 2019) %>% filter (DABH_1 %in% 1:2) %>% 
+temp1 <- data %>% filter (Year < 2017) %>% filter (DABH_1 %in% 1:2) %>% 
   mutate (RingWidth = RingWidthBH_1, Arc = ArcBH) 
-temp2 <- data %>% filter (Year < 2019) %>% filter (DABH_2 %in% 1:2) %>% 
+temp2 <- data %>% filter (Year < 2017) %>% filter (DABH_2 %in% 1:2) %>% 
   mutate (RingWidth = RingWidthBH_2, Arc = ArcBH) 
-temp3 <- data %>% filter (Year < 2019) %>% filter (DA2010_1 %in% 1:2) %>% 
+temp3 <- data %>% filter (Year < 2017) %>% filter (DA2010_1 %in% 1:2) %>% 
   mutate (RingWidth = RingWidth2010_1, Arc = Arc2010)
-temp4 <- data %>% filter (Year < 2019) %>% filter (DA2010_2 %in% 1:2) %>% 
+temp4 <- data %>% filter (Year < 2017) %>% filter (DA2010_2 %in% 1:2) %>% 
   mutate (RingWidth = RingWidth2010_2, Arc = Arc2010) 
 temp <- rbind (temp1, temp2, temp3, temp4); rm (temp1, temp2, temp3, temp4)
 

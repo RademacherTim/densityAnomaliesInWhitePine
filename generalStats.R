@@ -21,22 +21,22 @@ source ('plotingFunctions.R')
 
 # Wrangle data into long format with all possible explanatory variable for presence data
 #----------------------------------------------------------------------------------------
-temp1 <- data %>% filter (Year < 2019) %>% filter (DABH_1 %in% 1:2) %>% 
+temp1 <- data %>% filter (Year < 2017) %>% filter (DABH_1 %in% 1:2) %>% 
   mutate (WoodAge = WoodAgeBH, RingWidth = RingWidthBH_1, TOP = FALSE, BRANCH = FALSE, 
           densityAnomaly = TRUE)
-temp2 <- data %>% filter (Year < 2019) %>% filter (DABH_2 %in% 1:2) %>% 
+temp2 <- data %>% filter (Year < 2017) %>% filter (DABH_2 %in% 1:2) %>% 
   mutate (WoodAge = WoodAgeBH, RingWidth = RingWidthBH_2, TOP = FALSE, BRANCH = FALSE, 
           densityAnomaly = TRUE)
-temp3 <- data %>% filter (Year < 2019) %>% filter (DABranch_1 %in% 1:2) %>% 
+temp3 <- data %>% filter (Year < 2017) %>% filter (DABranch_1 %in% 1:2) %>% 
   mutate (WoodAge = NA, RingWidth = RingWidthNearBranch_1, TOP = FALSE, BRANCH = TRUE, 
           densityAnomaly = TRUE)
-temp4 <- data %>% filter (Year < 2019) %>% filter (DABranch_2 %in% 1:2) %>% 
+temp4 <- data %>% filter (Year < 2017) %>% filter (DABranch_2 %in% 1:2) %>% 
   mutate (WoodAge = NA, RingWidth = RingWidthNearBranch_2, TOP = FALSE, BRANCH = TRUE, 
           densityAnomaly = TRUE)
-temp5 <- data %>% filter (Year < 2019) %>% filter (DA2010_2 %in% 1:2) %>% 
+temp5 <- data %>% filter (Year < 2017) %>% filter (DA2010_2 %in% 1:2) %>% 
   mutate (WoodAge = WoodAge2010, RingWidth = RingWidth2010_1, TOP = TRUE, BRANCH = FALSE, 
           densityAnomaly = TRUE)
-temp6 <- data %>% filter (Year < 2019) %>% filter (DA2010_2 %in% 1:2) %>% 
+temp6 <- data %>% filter (Year < 2017) %>% filter (DA2010_2 %in% 1:2) %>% 
   mutate (WoodAge = WoodAge2010, RingWidth = RingWidth2010_2, TOP = TRUE, BRANCH = FALSE, 
           densityAnomaly = TRUE)
 temp <- rbind (temp1, temp2, temp3, temp4, temp5, temp6)
@@ -45,22 +45,22 @@ rm (temp1, temp2, temp3, temp4, temp5, temp6)
 
 # Wrangle data into long format with all possible explanatory variable for absence data
 #----------------------------------------------------------------------------------------
-tmp1 <- data %>% filter (Year < 2019) %>% filter (DABH_1 == 0) %>% 
+tmp1 <- data %>% filter (Year < 2017) %>% filter (DABH_1 == 0) %>% 
   mutate (WoodAge = WoodAgeBH, RingWidth = RingWidthBH_1, TOP = FALSE, BRANCH = FALSE, 
           densityAnomaly = FALSE)
-tmp2 <- data %>% filter (Year < 2019) %>% filter (DABH_2 == 0) %>% 
+tmp2 <- data %>% filter (Year < 2017) %>% filter (DABH_2 == 0) %>% 
   mutate (WoodAge = WoodAgeBH, RingWidth = RingWidthBH_2, TOP = FALSE, BRANCH = FALSE, 
           densityAnomaly = TRUE)
-tmp3 <- data %>% filter (Year < 2019) %>% filter (DABranch_1 == 0) %>% 
+tmp3 <- data %>% filter (Year < 2017) %>% filter (DABranch_1 == 0) %>% 
   mutate (WoodAge = NA, RingWidth = RingWidthNearBranch_1, TOP = FALSE, BRANCH = TRUE, 
           densityAnomaly = TRUE)
-tmp4 <- data %>% filter (Year < 2019) %>% filter (DABranch_2 == 0) %>% 
+tmp4 <- data %>% filter (Year < 2017) %>% filter (DABranch_2 == 0) %>% 
   mutate (WoodAge = NA, RingWidth = RingWidthNearBranch_2, TOP = FALSE, BRANCH = TRUE, 
           densityAnomaly = TRUE)
-tmp5 <- data %>% filter (Year < 2019) %>% filter (DA2010_2 == 0) %>% 
+tmp5 <- data %>% filter (Year < 2017) %>% filter (DA2010_2 == 0) %>% 
   mutate (WoodAge = WoodAge2010, RingWidth = RingWidth2010_1, TOP = TRUE, BRANCH = FALSE, 
           densityAnomaly = TRUE)
-tmp6 <- data %>% filter (Year < 2019) %>% filter (DA2010_2 == 0) %>% 
+tmp6 <- data %>% filter (Year < 2017) %>% filter (DA2010_2 == 0) %>% 
   mutate (WoodAge = WoodAge2010, RingWidth = RingWidth2010_2, TOP = TRUE, BRANCH = FALSE, 
           densityAnomaly = TRUE)
 tmp <- rbind (tmp1, tmp2, tmp3, tmp4, tmp5, tmp6)
