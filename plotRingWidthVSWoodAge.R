@@ -12,10 +12,10 @@ source ('readGrowthData.R')
 
 # Wrangle data
 #----------------------------------------------------------------------------------------
-summaryData <- data %>% 
-  mutate (RingWidthBH         = rowMeans (select (data, RingWidthBH_1, RingWidthBH_2), na.rm = TRUE),
-          RingWidthNearBranch = rowMeans (select (data, RingWidthNearBranch_1, RingWidthNearBranch_2), na.rm = TRUE),
-          RingWidth2010       = rowMeans (select (data, RingWidth2010_1, RingWidth2010_2), na.rm = TRUE)) %>% 
+summaryData <- data %>% filter (Year < 2017) %>%
+  mutate (RingWidthBH         = rowMeans (select (filter (data, Year < 2017), RingWidthBH_1, RingWidthBH_2), na.rm = TRUE),
+          RingWidthNearBranch = rowMeans (select (filter (data, Year < 2017), RingWidthNearBranch_1, RingWidthNearBranch_2), na.rm = TRUE),
+          RingWidth2010       = rowMeans (select (filter (data, Year < 2017), RingWidth2010_1, RingWidth2010_2), na.rm = TRUE)) %>% 
   select (WoodAgeBH, WoodAgeBranch, WoodAge2010, RingWidthBH, RingWidthNearBranch, RingWidth2010)
 
 # Plot wood age against ring width
@@ -26,12 +26,15 @@ plot (x = summaryData [['WoodAgeBH']], y = summaryData [['RingWidthBH']], las = 
       ylab = 'Ring width (mm)', xlab = 'Wood cambial age (years)', pch = 19, 
       col = addOpacity (colours [1], 0.8))
 abline (lm (RingWidthBH ~ WoodAgeBH, data = summaryData), col = colours [1], lwd = 2)
+summary (lm (RingWidthBH ~ WoodAgeBH, data = summaryData))
 points (x = summaryData [['WoodAgeBranch']], y = summaryData [['RingWidthNearBranch']], 
         las = 1, pch = 19, col = addOpacity (colours [2], 0.8))
 abline (lm (RingWidthNearBranch ~ WoodAgeBranch, data = summaryData), col = colours [2], lwd = 2)
+summary (lm (RingWidthNearBranch ~ WoodAgeBranch, data = summaryData))
 points (x = summaryData [['WoodAge2010']], y = summaryData [['RingWidth2010']], 
         las = 1, pch = 19, col = addOpacity (colours [3], 0.8))
 abline (lm (RingWidth2010 ~ WoodAge2010, data = summaryData), col = colours [3], lwd = 2)
+summary (lm (RingWidth2010 ~ WoodAge2010, data = summaryData))
 
 # Add legend 
 #----------------------------------------------------------------------------------------

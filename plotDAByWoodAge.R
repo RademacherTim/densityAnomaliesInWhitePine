@@ -14,7 +14,7 @@ layout (matrix (1:2, nrow = 1, byrow = TRUE), widths = c (1, 1))
 for (years in c ('all', 'select')) {
   
   if (years == 'all')    Years <- 1993:2017
-  if (years == 'select') Years <- c (1999, 2002, 2012, 2016) 
+  if (years == 'select') Years <- c (1999, 2002, 2012, 2013, 2016) 
   #print (Years)
   
   # Wrangle data to get frequency over wood age for breat height, near-branch and top-of-tree

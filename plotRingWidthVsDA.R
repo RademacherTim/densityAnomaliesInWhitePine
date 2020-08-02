@@ -17,7 +17,7 @@ layout (matrix (1:12, nrow = 4, byrow = TRUE), widths = c (1.2, 1, 1),
 for (years in c ('all', 'select')) {
 
   if (years == 'all')    Years <- 1993:2017
-  if (years == 'select') Years <- c (1999, 2002, 2012, 2016) 
+  if (years == 'select') Years <- c (1999, 2002, 2012, 2013, 2016) 
   #print (Years)
   
   # Wrangle data to get frequency over ring width for breast height and set of years
@@ -67,7 +67,7 @@ for (years in c ('all', 'select')) {
   #--------------------------------------------------------------------------------------
   if (years == 'all')    par (mar = c (0, 8, 2, 1))
   if (years == 'select') par (mar = c (0, 8, 1, 1))
-  plot (rhoBH, las = 1, xlim = c (0, 14), ylim = c (0, 0.75), xlab = '', lwd = 3, 
+  plot (rhoBH, las = 1, xlim = c (0, 14), ylim = c (0, 0.55), xlab = '', lwd = 3, 
         axes = FALSE, ylab = 'Density of \n density anomalies', main = '', col = 'white',
         cex.lab = 1.2)
   axis (side = 1, cex.axis = 1.5)
@@ -84,7 +84,7 @@ for (years in c ('all', 'select')) {
   #----------------------------------------------------------------------------------------
   if (years == 'all')    par (mar = c (0, 0, 2, 1))
   if (years == 'select') par (mar = c (0, 0, 1, 1))
-  plot (rhoBranch, las = 1, xlim = c (0, 14), ylim = c (0, 0.75), xlab = '', lwd = 3, axes = FALSE,
+  plot (rhoBranch, las = 1, xlim = c (0, 14), ylim = c (0, 0.55), xlab = '', lwd = 3, axes = FALSE,
         ylab = '', main = '', col = 'white')
   axis (1, cex.axis = 1.5)
   lines (rhoBranchwith,    col = colours [2], lwd = 3, lty = 1)
@@ -95,15 +95,15 @@ for (years in c ('all', 'select')) {
   #----------------------------------------------------------------------------------------
   if (years == 'all')    par (mar = c (0, 0, 2, 1))
   if (years == 'select') par (mar = c (0, 0, 1, 1))
-  plot (rho2010, las = 1, xlim = c (0, 14), ylim = c (0, 0.75), xlab = '', lwd = 3, axes = FALSE,
+  plot (rho2010, las = 1, xlim = c (0, 14), ylim = c (0, 0.55), xlab = '', lwd = 3, axes = FALSE,
         ylab = '', main = '', col = 'white')
   axis (1, cex.axis = 1.5)
   lines (rho2010with,  col = colours [3], lwd = 3, lty = 1)
   lines (rhoBHwithout, col = colours [3], lwd = 3, lty = 3)
-  if (years == 'all') legend (x = 6.5, y = 0.75, col = colours, lty = 1, 
+  if (years == 'all') legend (x = 6.5, y = 0.55, col = colours, lty = 1, 
                               legend = c ('breast height','near-branch','top-of-tree'),
                               lwd = 3, box.lty = 0, cex = 1.3)
-  if (years == 'select') legend (x = 6.5, y = 0.75, col = '#666666', lty = c (1, 3), 
+  if (years == 'select') legend (x = 6.5, y = 0.55, col = '#666666', lty = c (1, 3), 
                                  legend = c ('with density anomalies','without density anomalies'),
                                  lwd = 3, box.lty = 0, cex = 1.3)
   if (years == 'all') mtext (side = 3, line = 0.3, text = 'Top-of-tree', cex = 1.5)

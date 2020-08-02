@@ -27,7 +27,7 @@ summaryData <- data %>%
                                  nTop      = sum (!is.na (DATop))) %>%
   mutate (perBH  = sumBH  / nBH  * 100, perBranch = sumBranch / nBranch * 100,
           perTop = sumTop / nTop * 100) %>% 
-  filter (Year < 2019)
+  filter (Year < 2017)
 
 # Define width of the png files
 #----------------------------------------------------------------------------------------

@@ -13,7 +13,7 @@ source ('plotingFunctions.R')
 # Make bargraph of the number of density anomalies per tree in each radial profile at 
 # breast height, near the branch and in the 2010 section
 #----------------------------------------------------------------------------------------
-summaryData <- data %>% group_by (TreeID) %>% 
+summaryData <- data %>% filter (Year < 2017) %>% group_by (TreeID) %>% 
   summarise (nDABH_1  = sum (DABH_1, na.rm = TRUE),       
              nDABH_2  = sum (DABH_2, na.rm = TRUE),
              nDABra_1 = sum (DABranch_1, na.rm = TRUE),   

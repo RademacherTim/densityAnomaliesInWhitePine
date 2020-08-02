@@ -68,13 +68,13 @@ rm (tmp1, tmp2, tmp3, tmp4, tmp5, tmp6)
 
 # Combine presence and absence data
 #----------------------------------------------------------------------------------------
-longData <- rbind (temp, tmp) %>% select (densityAnomaly, Year, TreeID, WoodAge, 
+longData <- rbind (temp, tmp) %>% select (densityAnomaly, Year, TreeID, 
                                           RingWidth, TOP, BRANCH)
 
 # Create comprehensive logistic model to test for various effects
 #----------------------------------------------------------------------------------------
 modDensityAnomalyOccurence <- glm (densityAnomaly ~ factor (Year) + factor (TreeID) + 
-                                   WoodAge + RingWidth + TOP + BRANCH, data = longData, 
+                                   RingWidth + TOP + BRANCH, data = longData, 
                                    family = binomial (link = 'logit'))
 summary (modDensityAnomalyOccurence)
 anova (modDensityAnomalyOccurence, test = 'Chisq') # Look at ANOVA results to test for 
@@ -84,14 +84,15 @@ anova (modDensityAnomalyOccurence, test = 'Chisq') # Look at ANOVA results to te
 # Alternatively use elastic net parameter shrinkage to select best model 
 #----------------------------------------------------------------------------------------
 set.seed (42)
-modMat <- model.matrix (densityAnomaly ~ factor (Year) + factor (TreeID) + WoodAge + 
+modMat <- model.matrix (densityAnomaly ~ factor (Year) + factor (TreeID) + 
                         RingWidth + TOP + BRANCH, data = longData)
 cv.elasticNet <- cv.glmnet (x = modMat, 
                             y = as.matrix (filter (select (longData, densityAnomaly), 
-                                                  !is.na (longData [['RingWidth']]),
-                                                  !is.na (longData [['WoodAge']]))), 
-                            alpha = 0, family = 'binomial')
+                                                  !is.na (longData [['RingWidth']]))), 
+                            alpha = 1.0, family = 'binomial')
 coef (cv.elasticNet, cv.elasticNet [['lambda.1se']])
+# alpha = 0 basically means this is a ridge regression to choose a sparse model
+# alpha = 1 basically lasso which helps to group
 
 # Analyse dominance of explanatory variables
 #----------------------------------------------------------------------------------------
@@ -99,8 +100,10 @@ daDensityAnomalyOccurence <- dominanceAnalysis (modDensityAnomalyOccurence)
 getFits (daDensityAnomalyOccurence, "r2.m")
 dominanceMatrix (daDensityAnomalyOccurence, type = 'complete', fit.functions = "r2.m", 
                  ordered = TRUE)
+# Being near a branch dominates all other factors
 # Year dominantes TreeID, RingWidth, being at the top of the tree
-# WoodAge dominantes being near a branch
+# Being at top of a tree dominantes ring width
+# Ring width and tree id do not dominante over anything else
 plot (daDensityAnomalyOccurence, which.graph = 'conditional', fit.function = "r2.m")
 averageContribution (daDensityAnomalyOccurence, fit.functions = "r2.m")
 plot (daDensityAnomalyOccurence, which.graph = 'general', fit.function = "r2.m")
@@ -109,5 +112,7 @@ dominanceMatrix (daDensityAnomalyOccurence, type = 'general', fit.functions = "r
 
 bootModDensityAnomalies <- bootDominanceAnalysis (modDensityAnomalyOccurence, R = 1000)
 summary (bootModDensityAnomalies, fit.functions = "r2.m")
+# Being near a branch completely dominates all other factors
+# Year completely dominantes TreeID, RingWidth, being at the top of the tree
 
 #========================================================================================

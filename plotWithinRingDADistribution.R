@@ -91,51 +91,51 @@ mean (percentages2010); se (percentages2010)
 
 # Wrangle data to get density distribution for when they occur
 #----------------------------------------------------------------------------------------
-temp1  <- data %>% filter (Year %in% c (1999, 2002, 2012, 2016)) %>% 
+temp1  <- data %>% filter (Year %in% c (1999, 2002, 2012, 2013, 2016)) %>% 
   filter (DABH_1 == 1) %>% 
   mutate (perc = PercentageDABH_1.1) %>% 
   select (perc) %>% filter (!is.na (perc))
-temp2  <- data %>% filter (Year %in% c (1999, 2002, 2012, 2016))%>% 
+temp2  <- data %>% filter (Year %in% c (1999, 2002, 2012, 2013, 2016))%>% 
   filter (DABH_2 == 1) %>%
   mutate (perc = PercentageDABH_2.1) %>% 
   select (perc) %>% filter (!is.na (perc))
-temp3  <- data %>% filter (Year %in% c (1999, 2002, 2012, 2016))%>% 
+temp3  <- data %>% filter (Year %in% c (1999, 2002, 2012, 2013, 2016))%>% 
   filter (DABranch_1 == 1) %>% 
   mutate (perc = PercentageDABranch_1.1) %>% 
   select (perc) %>% filter (!is.na (perc))
-temp4  <- data %>% filter (Year %in% c (1999, 2002, 2012, 2016))%>% 
+temp4  <- data %>% filter (Year %in% c (1999, 2002, 2012, 2013, 2016))%>% 
   filter (DABranch_2 == 1) %>% 
   mutate (perc = PercentageDABranch_2.1) %>% 
   select (perc) %>% filter (!is.na (perc))
-temp5  <- data %>% filter (Year %in% c (1999, 2002, 2012, 2016))%>% 
+temp5  <- data %>% filter (Year %in% c (1999, 2002, 2012, 2013, 2016))%>% 
   filter (DA2010_1 == 1) %>% 
   mutate (perc = PercentageDA2010_1.1) %>% 
   select (perc) %>% filter (!is.na (perc))
-temp6  <- data %>% filter (Year %in% c (1999, 2002, 2012, 2016))%>% 
+temp6  <- data %>% filter (Year %in% c (1999, 2002, 2012, 2013, 2016))%>% 
   filter (DA2010_2 == 1) %>%
   mutate (perc = PercentageDA2010_2.1) %>% 
   select (perc) %>% filter (!is.na (perc))
-temp7  <- data %>% filter (Year %in% c (1999, 2002, 2012, 2016))%>% 
+temp7  <- data %>% filter (Year %in% c (1999, 2002, 2012, 2013, 2016))%>% 
   filter (DABH_1 == 2) %>% 
   mutate (perc = PercentageDABH_1.2) %>% 
   select (perc) %>% filter (!is.na (perc))
-temp8  <- data %>% filter (Year %in% c (1999, 2002, 2012, 2016))%>%
+temp8  <- data %>% filter (Year %in% c (1999, 2002, 2012, 2013, 2016))%>%
   filter (DABH_2 == 2) %>%
   mutate (perc = PercentageDABH_2.2) %>% 
   select (perc) %>% filter (!is.na (perc))
-temp9  <- data %>% filter (Year %in% c (1999, 2002, 2012, 2016))%>% 
+temp9  <- data %>% filter (Year %in% c (1999, 2002, 2012, 2013, 2016))%>% 
   filter (DABranch_1 == 2) %>% 
   mutate (perc = PercentageDABranch_1.2) %>% 
   select (perc) %>% filter (!is.na (perc))
-temp10 <- data %>% filter (Year %in% c (1999, 2002, 2012, 2016))%>% 
+temp10 <- data %>% filter (Year %in% c (1999, 2002, 2012, 2013, 2016))%>% 
   filter (DABranch_2 == 2) %>% 
   mutate (perc = PercentageDABranch_2.2) %>% 
   select (perc) %>% filter (!is.na (perc))
-temp11 <- data %>% filter (Year %in% c (1999, 2002, 2012, 2016))%>% 
+temp11 <- data %>% filter (Year %in% c (1999, 2002, 2012, 2013, 2016))%>% 
   filter (DA2010_1 == 2) %>% 
   mutate (perc = PercentageDA2010_1.2) %>% 
   select (perc) %>% filter (!is.na (perc))
-temp12 <- data %>% filter (Year %in% c (1999, 2002, 2012, 2016))%>% 
+temp12 <- data %>% filter (Year %in% c (1999, 2002, 2012, 2013, 2016))%>% 
   filter (DA2010_2 == 2) %>% 
   mutate (perc = PercentageDA2010_2.2) %>% 
   select (perc) %>% filter (!is.na (perc))
