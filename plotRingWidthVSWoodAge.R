@@ -20,6 +20,7 @@ summaryData <- data %>%
 
 # Plot wood age against ring width
 #----------------------------------------------------------------------------------------
+par (mfrow = c (1, 1))
 par (mar = c (5, 5, 1, 1))
 plot (x = summaryData [['WoodAgeBH']], y = summaryData [['RingWidthBH']], las = 1, 
       ylab = 'Ring width (mm)', xlab = 'Wood cambial age (years)', pch = 19, 
