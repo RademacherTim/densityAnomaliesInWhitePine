@@ -75,8 +75,8 @@ lines (rhoAll,    lwd = 3, col = '#666666')
 
 # Add a legend 
 #----------------------------------------------------------------------------------------
-legend (x = 10, y = 0.06, legend = c ('breast height', 'near-branch','top-of-tree','all'), 
-        col = c (colours, '#666666'), box.lty = 0, lwd = 3)
+# legend (x = 10, y = 0.06, legend = c ('breast height', 'near-branch','top-of-tree','all'), 
+#         col = c (colours, '#666666'), box.lty = 0, lwd = 3)
 
 # Close ploting device
 #----------------------------------------------------------------------------------------
@@ -166,7 +166,7 @@ lines (rhoAll,    lwd = 3, col = '#666666')
 
 # Add a legend 
 #----------------------------------------------------------------------------------------
-legend (x = 10, y = 0.065, legend = c ('breast height', 'near-branch','top-of-tree','all'), 
+legend (x = 30, y = 0.06, legend = c ('breast height', 'near-branch','top-of-tree','all'), 
         col = c (colours, '#666666'), box.lty = 0, lwd = 3)
 
 # Close ploting device
