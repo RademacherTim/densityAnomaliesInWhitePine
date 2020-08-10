@@ -14,8 +14,12 @@ library ('vioplot')
 png (file = 'fig/RingWidthVSDensityAnomaliesViolinPlots.png', width =  800, height = 450) # 16:9 aspect ratio
 layout (matrix (1:2, nrow = 1, byrow = TRUE), widths = c (1.2, 1))
 
+# Loop over all different selections of years
+#----------------------------------------------------------------------------------------
 for (years in c ('all', 'select')) {
   
+  # Select years
+  #--------------------------------------------------------------------------------------
   if (years == 'all')    Years <- 1993:2017
   if (years == 'select') Years <- c (1999, 2002, 2012, 2013, 2016) 
   #print (Years)
@@ -93,6 +97,5 @@ for (years in c ('all', 'select')) {
   if (years == 'all') axis (side = 2, las = 1, at = 5:6, labels = c ('without', 'with'))
   if (years == 'all') mtext (side = 2, line = 5, text = 'Top-of-tree', at = 5.5)
 }
-  
 dev.off ()
 #========================================================================================

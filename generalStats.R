@@ -123,4 +123,5 @@ longData %>% filter (Year < 2017) %>%
   group_by (densityAnomaly) %>% summarise (meanRingWidth = mean (RingWidth, na.rm = TRUE))
 longData %>% filter (Year %in% c (1999, 2002, 2012, 2013, 2016)) %>% 
   group_by (densityAnomaly) %>% summarise (meanRingWidth = mean (RingWidth, na.rm = TRUE))
+
 #========================================================================================
