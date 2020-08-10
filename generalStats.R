@@ -9,7 +9,6 @@ library ('caTools')
 library ('glmnet')
 library ('dominanceanalysis')
 library ('boot')
-library ('lme4')
 
 # Download and read the data
 #----------------------------------------------------------------------------------------
@@ -103,7 +102,8 @@ dominanceMatrix (daDensityAnomalyOccurence, type = 'complete', fit.functions = "
 # Being near a branch dominates all other factors
 # Year dominantes TreeID, RingWidth, being at the top of the tree
 # Being at top of a tree dominantes ring width
-# Ring width and tree id do not dominante over anything else
+# Ring width and tree id do not dominante over anything else, but ring width has a 
+# slightly higher r2.m when all factors are included.
 plot (daDensityAnomalyOccurence, which.graph = 'conditional', fit.function = "r2.m")
 averageContribution (daDensityAnomalyOccurence, fit.functions = "r2.m")
 plot (daDensityAnomalyOccurence, which.graph = 'general', fit.function = "r2.m")
@@ -115,4 +115,12 @@ summary (bootModDensityAnomalies, fit.functions = "r2.m")
 # Being near a branch completely dominates all other factors
 # Year completely dominantes TreeID, RingWidth, being at the top of the tree
 
+# Test whther ring width is greater in high-frequency years for ring with density anomaly
+#----------------------------------------------------------------------------------------
+t.test (RingWidth~densityAnomaly, alternative = 'less', 
+        data = longData %>%  filter (Year %in% c (1999, 2002, 2012, 2013, 2016)))
+longData %>% filter (Year < 2017) %>% 
+  group_by (densityAnomaly) %>% summarise (meanRingWidth = mean (RingWidth, na.rm = TRUE))
+longData %>% filter (Year %in% c (1999, 2002, 2012, 2013, 2016)) %>% 
+  group_by (densityAnomaly) %>% summarise (meanRingWidth = mean (RingWidth, na.rm = TRUE))
 #========================================================================================
