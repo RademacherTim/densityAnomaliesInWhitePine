@@ -10,7 +10,7 @@ library ('tidyverse')
 # Plot graph of density distribution by ring width with one panel for each height and a 
 # row for all data and height frequency years only
 #----------------------------------------------------------------------------------------
-png (file = 'fig/RingWidthVSDensityAnomalies.png', width =  1000, height = 400)
+png (file = 'fig/RingWidthVSDensityAnomalies.png', width =  800, height = 450) # 16:9 aspect ratio
 layout (matrix (1:12, nrow = 4, byrow = TRUE), widths = c (1.2, 1, 1),
         heights = c (1.1, 0.7, 1, 0.8))
 
@@ -74,11 +74,11 @@ for (years in c ('all', 'select')) {
   axis (side = 2, las = 1, cex.axis = 1.5)
   lines (rhoBHwith,    col = colours [1], lwd = 3, lty = 1)
   lines (rhoBHwithout, col = colours [1], lwd = 3, lty = 3)
-  if (years == 'all')    mtext (side = 2, line = 6, text = 'All years',       cex = 1.3, 
-                                at = 0.1)
-  if (years == 'all')    mtext (side = 3, line = 0.3, text = 'Breast height', cex = 1.5)
-  if (years == 'select') mtext (side = 2, line = 6, text = 'High-frequency years only',     
-                                cex = 1.3, at = 0.1)
+  #if (years == 'all')    mtext (side = 2, line = 6, text = 'All years',       cex = 1.3, 
+  #                              at = 0.1)
+  #if (years == 'all')    mtext (side = 3, line = 0.3, text = 'Breast height', cex = 1.5)
+  #if (years == 'select') mtext (side = 2, line = 6, text = 'High-frequency years only',     
+  #                              cex = 1.3, at = 0.1)
   
   # Plot graph of density distribution by ring width near a branch
   #----------------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ for (years in c ('all', 'select')) {
   axis (1, cex.axis = 1.5)
   lines (rhoBranchwith,    col = colours [2], lwd = 3, lty = 1)
   lines (rhoBranchwithout, col = colours [2], lwd = 3, lty = 3)
-  if (years == 'all') mtext (side = 3, line = 0.3, text = 'Near-branch', cex = 1.5)
+  #if (years == 'all') mtext (side = 3, line = 0.3, text = 'Near-branch', cex = 1.5)
   
   # Plot graph of density distribution by ring width near a 2010
   #----------------------------------------------------------------------------------------
@@ -100,78 +100,67 @@ for (years in c ('all', 'select')) {
   axis (1, cex.axis = 1.5)
   lines (rho2010with,  col = colours [3], lwd = 3, lty = 1)
   lines (rhoBHwithout, col = colours [3], lwd = 3, lty = 3)
-  if (years == 'all') legend (x = 6.5, y = 0.55, col = colours, lty = 1, 
+  if (years == 'all') legend (x = 4.5, y = 0.55, col = colours, lty = 1, 
                               legend = c ('breast height','near-branch','top-of-tree'),
                               lwd = 3, box.lty = 0, cex = 1.3)
-  if (years == 'select') legend (x = 6.5, y = 0.55, col = '#666666', lty = c (1, 3), 
+  if (years == 'select') legend (x = 4.5, y = 0.55, col = '#666666', lty = c (1, 3), 
                                  legend = c ('with density anomalies','without density anomalies'),
                                  lwd = 3, box.lty = 0, cex = 1.3)
-  if (years == 'all') mtext (side = 3, line = 0.3, text = 'Top-of-tree', cex = 1.5)
+  #if (years == 'all') mtext (side = 3, line = 0.3, text = 'Top-of-tree', cex = 1.5)
   
   # Plot boxplot of ring width by density anomaly at breast height
   #----------------------------------------------------------------------------------------
   par (mar = c (2, 8, 2, 1))
   plot (x = tmpBH [['RingWidth']] [tmpBH [['DA']] == 0], 
         y = jitter (tmpBH  [['DA']] [tmpBH [['DA']] == 0], amount = 0.2),
-        xlab = 'Ring width (mm)', xlim =  c (0, 14), ylim = c (-0.5, 2.5),
-        ylab = 'Number of \n density anomalies', col = addOpacity (colours [1], 0.3), 
+        xlab = 'Ring width (mm)', xlim =  c (0, 14), ylim = c (-0.5, 1.5),
+        ylab = '', col = "white",#addOpacity (colours [1], 0.3), 
         pch = 19, axes = FALSE, cex.lab = 1.2)
-  axis (2, at = 0:2, las = 1, cex.axis = 1.5)
+  axis (2, at = 0:1, labels = c ('without','with'), las = 1, cex.axis = 1.5)
   mtext (side = 1, line = 1, text = 'Ring width (mm)')
   boxplot (tmpBH [['RingWidth']] [tmpBH [['DA']] == 0], at = 0, add = TRUE, 
-           col = 'transparent', axes = FALSE, horizontal = TRUE)
-  points (x = tmpBH [['RingWidth']] [tmpBH [['DA']] == 1], 
-          y = jitter (tmpBH  [['DA']] [tmpBH [['DA']] == 1], amount = 0.2), 
-          col = addOpacity (colours [1], 0.3), pch = 19)
-  boxplot (tmpBH [['RingWidth']] [tmpBH [['DA']] == 1], at = 1, add = TRUE, 
-           col = 'transparent', axes = FALSE, horizontal = TRUE)
-  points (x = tmpBH [['RingWidth']] [tmpBH [['DA']] == 2], 
-          y = jitter (tmpBH  [['DA']] [tmpBH [['DA']] == 2], amount = 0.2), 
-          col = addOpacity (colours [1], 0.3), pch = 19)
-  boxplot (tmpBH [['RingWidth']] [tmpBH [['DA']] == 2], at = 2, add = TRUE, 
-           col = 'transparent', axes = FALSE, horizontal = TRUE)
-
+           col = 'transparent', axes = FALSE, horizontal = TRUE, border = colours [1])
+  # points (x = tmpBH [['RingWidth']] [tmpBH [['DA']] >= 1], 
+  #         y = jitter (tmpBH  [['DA']] [tmpBH [['DA']] >= 1], amount = 0.2), 
+  #         col = addOpacity (colours [1], 0.3), pch = 19)
+  boxplot (tmpBH [['RingWidth']] [tmpBH [['DA']] >= 1], at = 1, add = TRUE, 
+           col = addOpacity (colours [1], 0.5), axes = FALSE, horizontal = TRUE,
+           border = colours [1])
+  
   # Plot graph of ring width by density anomaly near a branch
   #----------------------------------------------------------------------------------------
   par (mar = c (2, 0, 2, 1))
   plot (x = tmpBranch [['RingWidth']] [tmpBranch [['DA']] == 0], 
         y = jitter (tmpBranch  [['DA']] [tmpBranch [['DA']] == 0], amount = 0.2), 
-        xlab = '', ylim = c (-0.5, 2.5), xlim = c (0, 14),
-        ylab = '', col = addOpacity (colours [2], 0.3), pch = 19, axes = FALSE)
+        xlab = '', ylim = c (-0.5, 1.5), xlim = c (0, 14),
+        ylab = '', col = "white", #addOpacity (colours [2], 0.3), 
+        pch = 19, axes = FALSE)
   mtext (side = 1, line = 1, text = 'Ring width (mm)')
   boxplot (tmpBranch [['RingWidth']] [tmpBranch [['DA']] == 0], at = 0, add = TRUE, 
-           col = 'transparent', axes = FALSE, horizontal = TRUE)
-  points (x = tmpBranch [['RingWidth']] [tmpBranch [['DA']] == 1], 
-          y = jitter (tmpBranch  [['DA']] [tmpBranch [['DA']] == 1], amount = 0.2), 
-          col = addOpacity (colours [2], 0.3), pch = 19)
-  boxplot (tmpBranch [['RingWidth']] [tmpBranch [['DA']] == 1], at = 1, add = TRUE, 
-           col = 'transparent', axes = FALSE, horizontal = TRUE)
-  points (x = tmpBranch [['RingWidth']] [tmpBranch [['DA']] == 2], 
-          y = jitter (tmpBranch  [['DA']] [tmpBranch [['DA']] == 2], amount = 0.2), 
-          col = addOpacity (colours [2], 0.3), pch = 19)
-  boxplot (tmpBranch [['RingWidth']] [tmpBranch [['DA']] == 2], at = 2, add = TRUE, 
-             col = 'transparent', axes = FALSE, horizontal = TRUE)
+           col = 'transparent', axes = FALSE, horizontal = TRUE, border = colours [2])
+  # points (x = tmpBranch [['RingWidth']] [tmpBranch [['DA']] >= 1], 
+  #         y = jitter (tmpBranch  [['DA']] [tmpBranch [['DA']] >= 1], amount = 0.2), 
+  #         col = addOpacity (colours [2], 0.3), pch = 19)
+  boxplot (tmpBranch [['RingWidth']] [tmpBranch [['DA']] >= 1], at = 1, add = TRUE, 
+           col = addOpacity (colours [2], 0.5), axes = FALSE, horizontal = TRUE, 
+           border = colours [2])
   
   # Plot graph of ring width by density anomaly near a 2010
   #----------------------------------------------------------------------------------------
   par (mar = c (2, 0, 2, 1))
   plot (x = tmp2010 [['RingWidth']] [tmp2010 [['DA']] == 0],
         y = jitter (tmp2010  [['DA']] [tmp2010 [['DA']] == 0], amount = 0.2), 
-        xlab = '', ylim = c (-0.5, 2.5), xlim = c (0, 14),
-        ylab = '', col = addOpacity (colours [3], 0.3), pch = 19, axes = FALSE)
+        xlab = '', ylim = c (-0.5, 1.5), xlim = c (0, 14),
+        ylab = '', col = "white", #addOpacity (colours [3], 0.3), 
+        pch = 19, axes = FALSE)
   mtext (side = 1, line = 1, text = 'Ring width (mm)')
   boxplot (tmp2010 [['RingWidth']] [tmp2010 [['DA']] == 0], at = 0, add = TRUE, 
-           col = 'transparent', axes = FALSE, horizontal = TRUE)
-  points (x = tmp2010 [['RingWidth']] [tmp2010 [['DA']] == 1], 
-          y = jitter (tmp2010  [['DA']] [tmp2010 [['DA']] == 1], amount = 0.2), 
-          col = addOpacity (colours [3], 0.3), pch = 19)
-  boxplot (tmp2010 [['RingWidth']] [tmp2010 [['DA']] == 1], at = 1, add = TRUE, 
-           col = 'transparent', axes = FALSE, horizontal = TRUE)
-  points (x = tmp2010 [['RingWidth']] [tmp2010 [['DA']] == 2], 
-          y = jitter (tmp2010  [['DA']] [tmp2010 [['DA']] == 2], amount = 0.2), 
-          col = addOpacity (colours [3], 0.3), pch = 19)
-  boxplot (tmp2010 [['RingWidth']] [tmp2010 [['DA']] == 2], at = 2, add = TRUE, 
-           col = 'transparent', axes = FALSE, horizontal = TRUE)
+           col = 'transparent', axes = FALSE, horizontal = TRUE, border = colours [3])
+  # points (x = tmp2010 [['RingWidth']] [tmp2010 [['DA']] >= 1], 
+  #         y = jitter (tmp2010  [['DA']] [tmp2010 [['DA']] >= 1], amount = 0.2), 
+  #         col = addOpacity (colours [3], 0.3), pch = 19)
+  boxplot (tmp2010 [['RingWidth']] [tmp2010 [['DA']] >= 1], at = 1, add = TRUE, 
+           col = addOpacity (colours [3], 0.5), axes = FALSE, horizontal = TRUE, border = colours [3])
 }
 dev.off ()
 #========================================================================================
