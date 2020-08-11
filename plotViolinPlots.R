@@ -98,4 +98,90 @@ for (years in c ('all', 'select')) {
   if (years == 'all') mtext (side = 2, line = 5, text = 'Top-of-tree', at = 5.5)
 }
 dev.off ()
+
+
+#----------------------------------------------------------------------------------------
+png (file = 'fig/withinRingDADistributionViolin.png', width =  800, height = 450) # 16:9 aspect ratio
+layout (matrix (1:2, nrow = 1, byrow = TRUE), widths = c (1.2, 1))
+
+# Loop over all different selections of years
+#----------------------------------------------------------------------------------------
+for (years in c ('all', 'select')) {
+
+  # Select years
+  #--------------------------------------------------------------------------------------
+  if (years == 'all')    Years <- 1993:2017
+  if (years == 'select') Years <- c (1999, 2002, 2012, 2013, 2016) 
+  
+  # # Wrangle data to get density distribution for when they occur
+  #----------------------------------------------------------------------------------------
+  temp1  <- data %>% filter (Year %in% Years) %>% filter (DABH_1 == 1) %>% 
+    mutate (perc = PercentageDABH_1.1) %>% 
+    select (perc) %>% filter (!is.na (perc))
+  temp2  <- data %>% filter (Year %in% Years)%>% filter (DABH_2 == 1) %>%
+    mutate (perc = PercentageDABH_2.1) %>% 
+    select (perc) %>% filter (!is.na (perc))
+  temp3  <- data %>% filter (Year %in% Years)%>% filter (DABranch_1 == 1) %>% 
+    mutate (perc = PercentageDABranch_1.1) %>% 
+    select (perc) %>% filter (!is.na (perc))
+  temp4  <- data %>% filter (Year %in% Years) %>% filter (DABranch_2 == 1) %>% 
+    mutate (perc = PercentageDABranch_2.1) %>% 
+    select (perc) %>% filter (!is.na (perc))
+  temp5  <- data %>% filter (Year %in% Years) %>% filter (DA2010_1 == 1) %>% 
+    mutate (perc = PercentageDA2010_1.1) %>% 
+    select (perc) %>% filter (!is.na (perc))
+  temp6  <- data %>% filter (Year %in% Years) %>% filter (DA2010_2 == 1) %>%
+    mutate (perc = PercentageDA2010_2.1) %>% 
+    select (perc) %>% filter (!is.na (perc))
+  temp7  <- data %>% filter (Year %in% Years) %>% filter (DABH_1 == 2) %>% 
+    mutate (perc = PercentageDABH_1.2) %>% 
+    select (perc) %>% filter (!is.na (perc))
+  temp8  <- data %>% filter (Year %in% Years) %>% filter (DABH_2 == 2) %>%
+    mutate (perc = PercentageDABH_2.2) %>% 
+    select (perc) %>% filter (!is.na (perc))
+  temp9  <- data %>% filter (Year %in% Years) %>% filter (DABranch_1 == 2) %>% 
+    mutate (perc = PercentageDABranch_1.2) %>% 
+    select (perc) %>% filter (!is.na (perc))
+  temp10 <- data %>% filter (Year %in% Years) %>% filter (DABranch_2 == 2) %>% 
+    mutate (perc = PercentageDABranch_2.2) %>% 
+    select (perc) %>% filter (!is.na (perc))
+  temp11 <- data %>% filter (Year %in% Years) %>% filter (DA2010_1 == 2) %>% 
+    mutate (perc = PercentageDA2010_1.2) %>% 
+    select (perc) %>% filter (!is.na (perc))
+  temp12 <- data %>% filter (Year %in% Years) %>% filter (DA2010_2 == 2) %>% 
+    mutate (perc = PercentageDA2010_2.2) %>% 
+    select (perc) %>% filter (!is.na (perc))
+  percentagesBH      <- rbind (temp1, temp2, temp7,  temp8)  [['perc']]
+  percentagesBranch  <- rbind (temp3, temp4, temp9,  temp10) [['perc']]
+  percentages2010    <- rbind (temp5, temp6, temp11, temp12) [['perc']]
+  
+  # Plot violin plot of ring width by density anomaly at breast height
+  #----------------------------------------------------------------------------------------
+  if (years == 'all') {
+    par (mar = c (5, 8, 2, 1)) 
+  } else if (years == 'select') {
+    par (mar = c (5, 2, 2, 1))
+  }
+  vioplot (percentagesBH, ylim = c (0, 100), xlim = c (0.5, 3.5), 
+           xlab = 'Percentage of ring formed (%)', names = '', yaxt = 'n',
+           col = addOpacity (colours [1], 0.5), 
+           cex.lab = 1.2, horizontal = TRUE, axes = FALSE, border = colours [1], 
+           rectCol = '#444444', lineCol = colours [1], 
+           colMed = '#777777', lwd = 2)
+  vioplot (percentagesBranch, ylim = c (0, 100), xlim = c (0.5, 3.5), 
+           ylab = '', names = '', add = TRUE, at = 2,
+           col = addOpacity (colours [2], 0.5), 
+           cex.lab = 1.2, horizontal = TRUE, axes = FALSE, border = colours [2], 
+           rectCol = '#444444', lineCol = colours [2], 
+           colMed = '#777777', lwd = 2)
+  vioplot (percentages2010, ylim = c (0, 100), xlim = c (0.5, 3.5), 
+           ylab = '', names = '', add = TRUE, at = 3,
+           col = addOpacity (colours [3], 0.5), 
+           cex.lab = 1.2, horizontal = TRUE, axes = FALSE, border = colours [3], 
+           rectCol = '#444444', lineCol = colours [3], 
+           colMed = '#777777', lwd = 2)
+  axis (side = 1, at =  seq (0, 100, by = 20))
+  if (years == 'all') axis (side = 2, at = 1:3, labels = c ('breast height', 'near-branch', 'top-of-tree'), las =1)
+}  
+dev.off ()
 #========================================================================================
