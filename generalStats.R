@@ -124,4 +124,148 @@ longData %>% filter (Year < 2017) %>%
 longData %>% filter (Year %in% c (1999, 2002, 2012, 2013, 2016)) %>% 
   group_by (densityAnomaly) %>% summarise (meanRingWidth = mean (RingWidth, na.rm = TRUE))
 
+
+# Run test to see differences in density anomaly position within the ring between groups 
+#----------------------------------------------------------------------------------------
+
+# Wrangle data for ANOVA
+#--------------------------------------------------------------------------------------
+for (years in c ('all','select')) {
+  if (years == 'all') Years <- 1993:2017
+  if (years == 'select') Years <- c (1999, 2002, 2012, 2013, 2016) 
+  
+  # Wrangle data to get density distribution for when they occur
+  #----------------------------------------------------------------------------------------
+  temp1  <- data %>% filter (Year %in% Years) %>% filter (DABH_1 == 1) %>% 
+    mutate (perc = PercentageDABH_1.1) %>% 
+    select (perc) %>% filter (!is.na (perc)) %>% 
+    mutate (years = years, height = 'BH')
+  temp2  <- data %>% filter (Year %in% Years)%>% filter (DABH_2 == 1) %>%
+    mutate (perc = PercentageDABH_2.1) %>% 
+    select (perc) %>% filter (!is.na (perc)) %>% 
+    mutate (years = years, height = 'BH')
+  temp3  <- data %>% filter (Year %in% Years)%>% filter (DABranch_1 == 1) %>% 
+    mutate (perc = PercentageDABranch_1.1) %>% 
+    select (perc) %>% filter (!is.na (perc)) %>% 
+    mutate (years = years, height = 'Branch')
+  temp4  <- data %>% filter (Year %in% Years) %>% filter (DABranch_2 == 1) %>% 
+    mutate (perc = PercentageDABranch_2.1) %>% 
+    select (perc) %>% filter (!is.na (perc)) %>% 
+    mutate (years = years, height = 'Branch')
+  temp5  <- data %>% filter (Year %in% Years) %>% filter (DA2010_1 == 1) %>% 
+    mutate (perc = PercentageDA2010_1.1) %>% 
+    select (perc) %>% filter (!is.na (perc)) %>% 
+    mutate (years = years, height = 'Top-of-tree')
+  temp6  <- data %>% filter (Year %in% Years) %>% filter (DA2010_2 == 1) %>%
+    mutate (perc = PercentageDA2010_2.1) %>% 
+    select (perc) %>% filter (!is.na (perc)) %>% 
+    mutate (years = years, height = 'Top-of-tree')
+  temp7  <- data %>% filter (Year %in% Years) %>% filter (DABH_1 == 2) %>% 
+    mutate (perc = PercentageDABH_1.2) %>% 
+    select (perc) %>% filter (!is.na (perc))  %>% 
+    mutate (years = years, height = 'BH')
+  temp8  <- data %>% filter (Year %in% Years) %>% filter (DABH_2 == 2) %>%
+    mutate (perc = PercentageDABH_2.2) %>% 
+    select (perc) %>% filter (!is.na (perc))  %>% 
+    mutate (years = years, height = 'BH')
+  temp9  <- data %>% filter (Year %in% Years) %>% filter (DABranch_1 == 2) %>% 
+    mutate (perc = PercentageDABranch_1.2) %>% 
+    select (perc) %>% filter (!is.na (perc)) %>% 
+    mutate (years = years, height = 'Branch')
+  temp10 <- data %>% filter (Year %in% Years) %>% filter (DABranch_2 == 2) %>% 
+    mutate (perc = PercentageDABranch_2.2) %>% 
+    select (perc) %>% filter (!is.na (perc)) %>% 
+    mutate (years = years, height = 'Branch')
+  temp11 <- data %>% filter (Year %in% Years) %>% filter (DA2010_1 == 2) %>% 
+    mutate (perc = PercentageDA2010_1.2) %>% 
+    select (perc) %>% filter (!is.na (perc)) %>% 
+    mutate (years = years, height = 'Top-of-tree')
+  temp12 <- data %>% filter (Year %in% Years) %>% filter (DA2010_2 == 2) %>% 
+    mutate (perc = PercentageDA2010_2.2) %>% 
+    select (perc) %>% filter (!is.na (perc)) %>% 
+    mutate (years = years, height = 'Top-of-tree')
+  temp <- rbind (temp1, temp2, temp3, temp4, temp5, temp6, temp7, temp8, temp9, temp10, 
+                 temp11, temp12)
+  if (years == 'all') {
+    percentages <- temp}
+  else {
+    percentages <- rbind (percentages, temp)
+  }
+}
+
+# Compute differences between groups of within-ring position with years and heights 
+#----------------------------------------------------------------------------------------
+res.aov <- aov (perc ~ years + height, data = percentages)
+# summary (res.aov)
+# plot (res.aov, 1) # homogeneity of variances looks good
+car::Anova (res.aov, type = 'III') # we use Anova, because of unbalanced group sizes
+TukeyHSD (res.aov)
+
+# Run test for differences between groups for ring width
+#----------------------------------------------------------------------------------------
+
+#----------------------------------------------------------------------------------------
+for (years in c ('all', 'select')) {
+  
+  # Select years
+  #--------------------------------------------------------------------------------------
+  if (years == 'all')    Years <- 1993:2017
+  if (years == 'select') Years <- c (1999, 2002, 2012, 2013, 2016) 
+  #print (Years)
+  
+  # Wrangle data to get frequency over ring width for breast height and set of years
+  #--------------------------------------------------------------------------------------
+  tmp1 <- data %>% filter (Year %in% Years) %>% 
+    filter (!is.na (RingWidthBH_1) & !is.na (DABH_1)) %>% 
+    select (RingWidthBH_1, DABH_1) %>% rename (RingWidth = RingWidthBH_1, DA = DABH_1)
+  tmp2 <- data %>% filter (Year %in% Years) %>% 
+    filter (!is.na (RingWidthBH_2) & !is.na (DABH_2)) %>% 
+    select (RingWidthBH_2, DABH_2) %>% rename (RingWidth = RingWidthBH_2, DA = DABH_2)
+  tmpBH <- rbind (tmp1, tmp2); rm (tmp1, tmp2)
+  tmpBH [['DA']] [tmpBH [['DA']] == 2] <- 1
+  
+  # Wrangle data to get frequency over ring width for near-branch and set of years
+  #----------------------------------------------------------------------------------------
+  tmp1 <- data %>% filter (Year %in% Years) %>%
+    filter (!is.na (RingWidthNearBranch_1) & !is.na (DABranch_1)) %>% 
+    select (RingWidthNearBranch_1, DABranch_1) %>% 
+    rename (RingWidth = RingWidthNearBranch_1, DA = DABranch_1)
+  tmp2 <- data %>% filter (Year %in% Years) %>% 
+    filter (!is.na (RingWidthNearBranch_2) & !is.na (DABranch_2)) %>% 
+    select (RingWidthNearBranch_2, DABranch_2) %>% 
+    rename (RingWidth = RingWidthNearBranch_2, DA = DABranch_2)
+  tmpBranch <- rbind (tmp1, tmp2); rm (tmp1, tmp2)
+  tmpBranch [['DA']] [tmpBranch [['DA']] == 2] <- 1
+  
+  # Wrangle data to get frequency over ring width for top-of-tree and set of years
+  #----------------------------------------------------------------------------------------
+  tmp1 <- data %>% filter (Year %in% Years) %>% 
+    filter (!is.na (RingWidth2010_1) & !is.na (DA2010_1)) %>% 
+    select (RingWidth2010_1, DA2010_1) %>% 
+    rename (RingWidth = RingWidth2010_1, DA = DA2010_1)
+  tmp2 <- data %>% filter (Year%in% Years) %>%
+    filter (!is.na (RingWidth2010_2) & !is.na (DA2010_2)) %>% 
+    select (RingWidth2010_2, DA2010_2) %>% 
+    rename (RingWidth = RingWidth2010_2, DA = DA2010_2)
+  tmp2010 <- rbind (tmp1, tmp2); rm (tmp1, tmp2)
+  tmp2010 [['DA']] [tmp2010 [['DA']] == 2] <- 1
+  
+  if (years == 'all') {
+    temp <- rbind (mutate (tmpBH,     height = 'BH',          years = years),
+                   mutate (tmpBranch, height = 'Branch',      years = years),
+                   mutate (tmp2010,   height = 'Top-of-tree', years = years))
+  } else {
+    temp <- rbind (temp, mutate (tmpBH, height = 'BH',          years = years),
+                   mutate (tmpBranch,   height = 'Branch',      years = years),
+                   mutate (tmp2010,     height = 'Top-of-tree', years = years))
+  }
+}
+temp [['DA']] <- factor (temp [['DA']])
+res.aov <- aov (RingWidth ~ DA + height + years, data = temp)
+summary (res.aov)
+# plot (res.aov, 1) # homogeneity of variances looks good
+car::Anova (res.aov, type = 'III') # we use Anova, because of unbalanced group sizes
+TukeyHSD (res.aov)
+leveneTest (log(perc) ~years + height, data = percentages)
+
 #========================================================================================

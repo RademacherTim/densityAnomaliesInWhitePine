@@ -7,6 +7,7 @@
 source ('readGrowthData.R')
 library ('tidyverse')
 library ('vioplot')
+library ('car')
 
 # Plot graph of density distribution by ring width with one panel for each height and a 
 # row for all data and height frequency years only
@@ -71,15 +72,16 @@ for (years in c ('all', 'select')) {
     labNames = c ('','')
   }
   vioplot (RingWidth~DA, data = tmpBH, xlim = c (0.5, 6.5), ylim = c (0, 14), las = 1,
-           ylab = '', names = labNames, 
+           xlab = '', ylab = '', names = labNames, 
            col = c ('transparent', addOpacity (colours [1], 0.5)), yaxt = 'n',
            cex.lab = 1.2, horizontal = TRUE, axes = FALSE, border = colours [1], 
            rectCol = '#444444', lineCol = colours [1], colMed = '#777777', lwd = 2)
   axis (side = 1)
-  #mtext (side = 1, line = 1, text = 'Ring width (mm)')
-  if (years == 'all') axis (side = 2, las = 1, at = 1:2, labels = c ('without','with'))
-  if (years == 'all') axis (side = 2, las = 1, at = 3:4, labels = c ('without','with'))
-  if (years == 'all') mtext (side = 2, line = 5, text = 'Breast height', at = 1.5)
+  mtext (side = 1, line = 3, text = 'Ring width (mm)')
+  if (years == 'all') {
+    axis (side = 2, las = 1, at = 1:2, labels = c ('without','with'))
+    mtext (side = 2, line = 5, text = 'Breast height', at = 1.5)
+  }
   vioplot (RingWidth~DA, data = tmpBranch, add = TRUE,
            xlab = '', at = 3:4, las = 1,
            ylab = '', names = labNames, 
@@ -113,7 +115,7 @@ for (years in c ('all', 'select')) {
   if (years == 'all')    Years <- 1993:2017
   if (years == 'select') Years <- c (1999, 2002, 2012, 2013, 2016) 
   
-  # # Wrangle data to get density distribution for when they occur
+  # Wrangle data to get density distribution for when they occur
   #----------------------------------------------------------------------------------------
   temp1  <- data %>% filter (Year %in% Years) %>% filter (DABH_1 == 1) %>% 
     mutate (perc = PercentageDABH_1.1) %>% 
