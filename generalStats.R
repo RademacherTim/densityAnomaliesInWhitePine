@@ -49,19 +49,19 @@ tmp1 <- data %>% filter (Year < 2017) %>% filter (DABH_1 == 0) %>%
           densityAnomaly = FALSE)
 tmp2 <- data %>% filter (Year < 2017) %>% filter (DABH_2 == 0) %>% 
   mutate (WoodAge = WoodAgeBH, RingWidth = RingWidthBH_2, TOP = FALSE, BRANCH = FALSE, 
-          densityAnomaly = TRUE)
+          densityAnomaly = FALSE)
 tmp3 <- data %>% filter (Year < 2017) %>% filter (DABranch_1 == 0) %>% 
   mutate (WoodAge = NA, RingWidth = RingWidthNearBranch_1, TOP = FALSE, BRANCH = TRUE, 
-          densityAnomaly = TRUE)
+          densityAnomaly = FALSE)
 tmp4 <- data %>% filter (Year < 2017) %>% filter (DABranch_2 == 0) %>% 
   mutate (WoodAge = NA, RingWidth = RingWidthNearBranch_2, TOP = FALSE, BRANCH = TRUE, 
-          densityAnomaly = TRUE)
+          densityAnomaly = FALSE)
 tmp5 <- data %>% filter (Year < 2017) %>% filter (DA2010_2 == 0) %>% 
   mutate (WoodAge = WoodAge2010, RingWidth = RingWidth2010_1, TOP = TRUE, BRANCH = FALSE, 
-          densityAnomaly = TRUE)
+          densityAnomaly = FALSE)
 tmp6 <- data %>% filter (Year < 2017) %>% filter (DA2010_2 == 0) %>% 
   mutate (WoodAge = WoodAge2010, RingWidth = RingWidth2010_2, TOP = TRUE, BRANCH = FALSE, 
-          densityAnomaly = TRUE)
+          densityAnomaly = FALSE)
 tmp <- rbind (tmp1, tmp2, tmp3, tmp4, tmp5, tmp6)
 rm (tmp1, tmp2, tmp3, tmp4, tmp5, tmp6)
 
@@ -72,8 +72,8 @@ longData <- rbind (temp, tmp) %>% select (densityAnomaly, Year, TreeID,
 
 # Create comprehensive logistic model to test for various effects
 #----------------------------------------------------------------------------------------
-modDensityAnomalyOccurence <- glm (densityAnomaly ~ factor (Year) + factor (TreeID) + 
-                                   RingWidth + TOP + BRANCH, data = longData, 
+modDensityAnomalyOccurence <- glm (densityAnomaly ~ factor (Year) * RingWidth + 
+                                   factor (TreeID) + TOP + BRANCH, data = longData, 
                                    family = binomial (link = 'logit'))
 summary (modDensityAnomalyOccurence)
 anova (modDensityAnomalyOccurence, test = 'Chisq') # Look at ANOVA results to test for 
@@ -84,7 +84,7 @@ anova (modDensityAnomalyOccurence, test = 'Chisq') # Look at ANOVA results to te
 #----------------------------------------------------------------------------------------
 set.seed (42)
 modMat <- model.matrix (densityAnomaly ~ factor (Year) + factor (TreeID) + 
-                        RingWidth + TOP + BRANCH, data = longData)
+                        RingWidth + TOP + BRANCH + factor (Year):RingWidth, data = longData)
 cv.elasticNet <- cv.glmnet (x = modMat, 
                             y = as.matrix (filter (select (longData, densityAnomaly), 
                                                   !is.na (longData [['RingWidth']]))), 
@@ -120,9 +120,11 @@ summary (bootModDensityAnomalies, fit.functions = "r2.m")
 t.test (RingWidth~densityAnomaly, alternative = 'less', 
         data = longData %>%  filter (Year %in% c (1999, 2002, 2012, 2013, 2016)))
 longData %>% filter (Year < 2017) %>% 
-  group_by (densityAnomaly) %>% summarise (meanRingWidth = mean (RingWidth, na.rm = TRUE))
+  group_by (densityAnomaly) %>% summarise (meanRingWidth = mean (RingWidth, na.rm = TRUE),
+                                           sdRingWidth = sd (RingWidth, na.rm = TRUE))
 longData %>% filter (Year %in% c (1999, 2002, 2012, 2013, 2016)) %>% 
-  group_by (densityAnomaly) %>% summarise (meanRingWidth = mean (RingWidth, na.rm = TRUE))
+  group_by (densityAnomaly) %>% summarise (meanRingWidth = mean (RingWidth, na.rm = TRUE),
+                                           sdRingWidth = sd (RingWidth, na.rm = TRUE))
 
 
 # Run test to see differences in density anomaly position within the ring between groups 
@@ -268,4 +270,9 @@ car::Anova (res.aov, type = 'III') # we use Anova, because of unbalanced group s
 TukeyHSD (res.aov)
 leveneTest (log(perc) ~years + height, data = percentages)
 
+# Median number of anomalies per year
+#----------------------------------------------------------------------------------------
+longData %>% group_by (Year) %>%
+  summarise (sumDA = sum (densityAnomaly), n = sum (!is.na (densityAnomaly))) %>% 
+  mutate (perc = sumDA * 100 / n) %>% select (perc) %>% summarise (median = median (perc))
 #========================================================================================
