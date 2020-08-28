@@ -98,6 +98,13 @@ for (years in c ('all', 'select')) {
            rectCol = '#444444', lineCol = colours [3], colMed = '#777777', lwd = 2)
   if (years == 'all') axis (side = 2, las = 1, at = 5:6, labels = c ('without', 'with'))
   if (years == 'all') mtext (side = 2, line = 5, text = 'Top-of-tree', at = 5.5)
+  
+  print (tmpBH %>% filter (DA == 1) %>% nrow ()) # Number of rings with density anomaly
+  print (tmpBH %>% filter (DA == 0) %>% nrow ()) # Number of rings without density anomaly
+  print (tmpBranch %>% filter (DA == 1) %>% nrow ()) # Number of rings with density anomaly
+  print (tmpBranch %>% filter (DA == 0) %>% nrow ()) # Number of rings without density anomaly
+  print (tmp2010 %>% filter (DA == 1) %>% nrow ()) # Number of rings with density anomaly
+  print (tmp2010 %>% filter (DA == 0) %>% nrow ()) # Number of rings without density anomaly
 }
 dev.off ()
 
@@ -184,6 +191,10 @@ for (years in c ('all', 'select')) {
            colMed = '#777777', lwd = 2)
   axis (side = 1, at =  seq (0, 100, by = 20))
   if (years == 'all') axis (side = 2, at = 1:3, labels = c ('breast height', 'near-branch', 'top-of-tree'), las =1)
+
+  print (percentagesBH %>% length ()) # Number of rings with density anomaly at breast height
+  print (percentagesBranch %>% length ()) # Number of rings with density anomaly near branches
+  print (percentages2010 %>% length ()) # Number of rings with density anomaly at the top of the tree
 }  
 dev.off ()
 #========================================================================================

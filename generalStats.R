@@ -274,5 +274,9 @@ leveneTest (log(perc) ~years + height, data = percentages)
 #----------------------------------------------------------------------------------------
 longData %>% group_by (Year) %>%
   summarise (sumDA = sum (densityAnomaly), n = sum (!is.na (densityAnomaly))) %>% 
-  mutate (perc = sumDA * 100 / n) %>% select (perc) %>% summarise (median = median (perc))
+  mutate (perc = sumDA * 100 / n) %>% select (perc) %>% summarise (median = median (perc), mean = mean (perc))
+longData %>% group_by (Year) %>% filter (Year %in% c (1999, 2002, 2012, 2013, 2016)) %>%
+  summarise (sumDA = sum (densityAnomaly), n = sum (!is.na (densityAnomaly))) %>% 
+  mutate (perc = sumDA * 100 / n) %>% select (perc) %>% summarise (median = median (perc), mean = mean (perc))
+
 #========================================================================================
