@@ -33,7 +33,7 @@ layout (matrix (1:2, nrow = 1, byrow = TRUE), widths = c (1.2, 1))
 
 par (mar = c (5, 5, 1, 1))
 plot (x = yearlyData [['Year']], y = yearlyData [['meanArcBH']], 
-      xlab = 'Year', ylab = expression (paste ('Arc of density anomalies (', degree,')')), 
+      xlab = 'Year', ylab = expression (paste ('Arc of intra-annual density fluctuations (', degree,')')), 
       xlim = c (1995, 2017), ylim = c (0, 380), col = colours [1], pch = 19, axes = FALSE, 
       cex = 1.5)
 axis (1)
@@ -49,7 +49,7 @@ arrows (x0 = yearlyData [['Year']],
         y1 = yearlyData [['meanArc2010']] + yearlyData [['seArc2010']], angle = 90, 
         length = 0.05, code = 3, col = colours [3], lwd = 3)
 legend (x = 2005, y = 50, box.lty = 0, col = colours [c (1,3)], pch = 19, lwd = 3,
-        legend = c ('breast-height','top-of-tree'), bg = 'transparent')
+        legend = c ('breast-height','top-of-tree'), bg = 'transparent', cex = 0.9)
 # Plot arc by tree
 #----------------------------------------------------------------------------------------
 # par (mar = c (5, 5, 1, 1))
@@ -121,7 +121,7 @@ temp <- rbind (temp1, temp2, temp3, temp4); rm (temp1, temp2, temp3, temp4)
 # Plot arc by tree
 #----------------------------------------------------------------------------------------
 points (x = temp [['RingWidth']], y = temp [['Arc']], axes = FALSE,
-        xlab = 'Ring width (mm)', ylab = expression (paste ('Arc of density anomalies (', degree,')')), 
+        xlab = 'Ring width (mm)', ylab = expression (paste ('Arc of intra-annual density fluctuations (', degree,')')), 
         xlim = c (0, 8), ylim = c (0, 380),
         col = '#D46300', pch = 19)
 
@@ -133,7 +133,7 @@ anova (modRingWidth)
 abline (modRingWidth, col = '#D46300', lwd = 2, lty = 2)
 
 legend (x = 4.2, y = 50, box.lty = 0, pch = 19, col = c ('#FFA500','#D46300'), 
-        legend = c ('all years', 'high-frequency years only'))
+        legend = c ('all years', 'prone years only'), cex = 0.9)
 dev.off ()
 
 # Test for effect of year on arc of density anomaly
@@ -169,7 +169,7 @@ woodAgeData <- temp %>% group_by (WoodAge) %>%
 #----------------------------------------------------------------------------------------
 par (mar = c (5, 5, 1, 1))
 plot (x = woodAgeData [['WoodAge']], y = woodAgeData [['meanArc']], axes = FALSE,
-      xlab = "Wood's cambial age (years)", ylab = expression (paste ('Arc of density anomalies (', degree,')')), 
+      xlab = "Wood's cambial age (years)", ylab = expression (paste ('Arc of intra-annual density fluctuations (', degree,')')), 
       xlim = c (0, 25), ylim = c (0, 380),
       col = '#FFA500', pch = 19)
 axis (1, at = seq (0, 25, by = 5))
@@ -186,3 +186,4 @@ summary (modWoodAge)
 anova (modWoodAge)
 abline (modWoodAge, col = '#FFA500', lwd = 2, lty = 2)
 #========================================================================================
+

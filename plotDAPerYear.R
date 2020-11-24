@@ -57,7 +57,7 @@ plot (x = summaryData [['Year']], y = summaryData [['perBH']], col = 'white',
 axis (side = 1, cex.axis = 2, at = seq (1990, 2020, by = 5))
 axis (side = 2, cex.axis = 2, las = 1)
 mtext (side = 1, line = 4, cex = 2, text = 'Year')
-mtext (side = 2, line = 4.5, cex = 2, text = 'Percentage of annual rings \n with density anomaly (%)')
+mtext (side = 2, line = 4.5, cex = 2, text = 'Percentage of annual rings with \n intra-annual density fluctuations (%)')
 lines (x = summaryData [['Year']], y = summaryData [['perBH']], col = colours [1],
        lwd = 4)
 points (x = summaryData [['Year']], y = summaryData [['perBH']], col = colours [1], 
@@ -97,7 +97,7 @@ plot (x = summaryData [['Year']], y = summaryData [['perBranch']], col = 'white'
 axis (side = 1, cex.axis = 2, at = seq (1990, 2020, by = 5))
 axis (side = 2, cex.axis = 2, las = 1)
 mtext (side = 1, line = 4, cex = 2, text = 'Year')
-mtext (side = 2, line = 4.5, cex = 2, text = 'Percentage of annual rings \n with density anomaly (%)')
+mtext (side = 2, line = 4.5, cex = 2, text = 'Percentage of annual rings with \n intra-annual density fluctuations (%)')
 lines (x = summaryData [['Year']], y = summaryData [['perBranch']], col = colours [2],
        lwd = 4)
 points (x = summaryData [['Year']], y = summaryData [['perBranch']], col = colours [2], 
@@ -137,7 +137,7 @@ plot (x = summaryData [['Year']], y = summaryData [['perTop']], col = 'white',
 axis (side = 1, cex.axis = 2, at = seq (1990, 2020, by = 5))
 axis (side = 2, cex.axis = 2, las = 1)
 mtext (side = 1, line = 4, cex = 2, text = 'Year')
-mtext (side = 2, line = 4.5, cex = 2, text = 'Percentage of annual rings \n with density anomaly (%)')
+mtext (side = 2, line = 4.5, cex = 2, text = 'Percentage of annual rings with \n intra-annual density fluctuations (%)')
 lines (x = summaryData [['Year']], y = summaryData [['perTop']], col = colours [3],
        lwd = 4)
 points (x = summaryData [['Year']], y = summaryData [['perTop']], col = colours [3], 
@@ -153,3 +153,4 @@ legend (x = 1992.5, y = 100, box.lty = 0, pch = c (21, 30), col = c (colours [3]
 #----------------------------------------------------------------------------------------
 dev.off ()
 #========================================================================================
+
