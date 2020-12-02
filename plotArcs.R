@@ -28,7 +28,7 @@ treeData <- data %>% filter (Year < 2017) %>% group_by (TreeID) %>%
 
 # Plot arc by year  
 #----------------------------------------------------------------------------------------
-png (file = './fig/ArcBy.png', width = 600, height = 400)
+png (file = './fig/ArcBy.png', width = 800, height = 400)
 layout (matrix (1:2, nrow = 1, byrow = TRUE), widths = c (1.2, 1))
 
 par (mar = c (5, 5, 1, 1))
@@ -49,7 +49,7 @@ arrows (x0 = yearlyData [['Year']],
         y1 = yearlyData [['meanArc2010']] + yearlyData [['seArc2010']], angle = 90, 
         length = 0.05, code = 3, col = colours [3], lwd = 3)
 legend (x = 2005, y = 50, box.lty = 0, col = colours [c (1,3)], pch = 19, lwd = 3,
-        legend = c ('breast-height','top-of-tree'), bg = 'transparent', cex = 0.9)
+        legend = c ('breast-height','top-of-tree'), bg = 'transparent')
 # Plot arc by tree
 #----------------------------------------------------------------------------------------
 # par (mar = c (5, 5, 1, 1))
@@ -133,7 +133,7 @@ anova (modRingWidth)
 abline (modRingWidth, col = '#D46300', lwd = 2, lty = 2)
 
 legend (x = 4.2, y = 50, box.lty = 0, pch = 19, col = c ('#FFA500','#D46300'), 
-        legend = c ('all years', 'prone years only'), cex = 0.9)
+        legend = c ('all years', 'prone years only'))
 dev.off ()
 
 # Test for effect of year on arc of density anomaly
