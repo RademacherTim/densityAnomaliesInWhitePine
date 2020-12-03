@@ -42,13 +42,13 @@ arrows (x0 = yearlyData [['Year']],
         y0 = yearlyData [['meanArcBH']] - yearlyData [['seArcBH']],
         y1 = yearlyData [['meanArcBH']] + yearlyData [['seArcBH']], angle = 90, 
         length = 0.05, code = 3, col = colours [1], lwd = 3)
-points (x = yearlyData [['Year']], y = yearlyData [['meanArc2010']], 
-        col = colours [3], pch = 19, cex = 1.5)
 arrows (x0 = yearlyData [['Year']], 
         y0 = yearlyData [['meanArc2010']] - yearlyData [['seArc2010']],
         y1 = yearlyData [['meanArc2010']] + yearlyData [['seArc2010']], angle = 90, 
         length = 0.05, code = 3, col = colours [3], lwd = 3)
-legend (x = 2005, y = 50, box.lty = 0, col = colours [c (1,3)], pch = 19, lwd = 3,
+points (x = yearlyData [['Year']], y = yearlyData [['meanArc2010']], 
+        col = colours [3], pch = 23, cex = 1.5, lwd = 3, bg = 'white')
+legend (x = 2005, y = 50, box.lty = 0, col = colours [c (1,3)], pch = c (19, 23), pt.bg = 'white', lwd = 3,
         legend = c ('breast-height','top-of-tree'), bg = 'transparent')
 # Plot arc by tree
 #----------------------------------------------------------------------------------------
@@ -99,7 +99,7 @@ axis (1)
 modRingWidth <- lm (Arc ~ RingWidth, data = temp); rm (temp)
 summary (modRingWidth)
 anova (modRingWidth)
-abline (modRingWidth, col = '#FFA500', lwd = 2, lty = 2)
+abline (modRingWidth, col = '#FFA500', lwd = 2, lty = 1)
 
 # Wrangle data to get average and standard deviation of arc by ring width for 
 # high-frequency years only
@@ -120,10 +120,10 @@ temp <- rbind (temp1, temp2, temp3, temp4); rm (temp1, temp2, temp3, temp4)
 
 # Plot arc by tree
 #----------------------------------------------------------------------------------------
-points (x = temp [['RingWidth']], y = temp [['Arc']], axes = FALSE,
+points (x = temp [['RingWidth']], y = temp [['Arc']], 
         xlab = 'Ring width (mm)', ylab = expression (paste ('Arc of intra-annual density fluctuations (', degree,')')), 
         xlim = c (0, 8), ylim = c (0, 380),
-        col = '#D46300', pch = 19)
+        col = '#D46300', pch = 23, lwd = 2)
 
 # Test for effect of wood age on arc of density anomaly 
 #----------------------------------------------------------------------------------------
@@ -132,7 +132,7 @@ summary (modRingWidth)
 anova (modRingWidth)
 abline (modRingWidth, col = '#D46300', lwd = 2, lty = 2)
 
-legend (x = 4.2, y = 50, box.lty = 0, pch = 19, col = c ('#FFA500','#D46300'), 
+legend (x = 4.2, y = 50, box.lty = 0, pch = c (19, 23), pt.bg = '#FFA500', col = c ('#FFA500','#D46300'), 
         legend = c ('all years', 'prone years only'))
 dev.off ()
 

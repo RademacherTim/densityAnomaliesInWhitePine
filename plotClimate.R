@@ -6,6 +6,7 @@
 #----------------------------------------------------------------------------------------
 if (!existsFunction ('esat'))       library ('plantecophys')
 if (!existsFunction ('floor_date')) library ('lubridate')
+if (!existsFunction ('tibble'))     library ('tidyverse')
 
 # create %notin% operator
 #----------------------------------------------------------------------------------------
@@ -52,6 +53,7 @@ averageClimate <- monthlyMetData %>% filter (year (date) %notin% IADFyears) %>%
 
 # plot average climate 
 #----------------------------------------------------------------------------------------
+png (filename = './fig/FigureS1.png', width = 726, height = 912)
 par (mfrow = c (5, 1))
 par (mar = c (5, 10, 1, 5))
 plot (x = averageClimate [, 1] [[1]],
@@ -72,11 +74,11 @@ par (new = TRUE)
 plot (x = averageClimate [, 1] [[1]],
       y = averageClimate [['meanPrec']],
       col = '#80b1d3', lwd = 2, typ = 'l', las = 1, xlab = '', ylab = '',
-      ylim = c (0, 240), axes = FALSE)
+      ylim = c (0, 240), axes = FALSE, lty = 2)
 polygon (x = c (1:12, 12:1), 
          y = c (averageClimate [['meanPrec']] + averageClimate [['sdPrec']], 
                 rev (averageClimate [['meanPrec']] - averageClimate [['sdPrec']])),
-         lty= 0, col = '#80b1d366')
+         lty = 0, col = '#80b1d366')
 axis (side = 4, las = 1, col = '#80b1d3', col.axis = '#80b1d3')
 mtext (side = 4, line = 3, text = 'Precipitation (mm)', 
        col = '#80b1d3')
@@ -84,11 +86,11 @@ par (new = TRUE)
 plot (x = averageClimate [, 1] [[1]],
       y = averageClimate [['meanVpd']],
       col = '#fc8d62', lwd = 2, typ = 'l', las = 1, xlab = '', ylab = '',
-      ylim = c (0, 0.8), axes = FALSE, lty = 2)
+      ylim = c (0, 0.8), axes = FALSE, lty = 3)
 polygon (x = c (1:12, 12:1), 
          y = c (averageClimate [['meanVpd']] + averageClimate [['sdVpd']], 
                 rev (averageClimate [['meanVpd']] - averageClimate [['sdVpd']])),
-         lty= 0, col = '#fc8d6266')
+         lty = 0, col = '#fc8d6266')
 axis (side = 2, line = 5, las = 1, col = '#fc8d62', col.axis = '#fc8d62')
 mtext (side = 2, line = 8, text = 'VPD (kPa)', 
        col = '#fc8d62')
@@ -110,7 +112,7 @@ for (iYear in IADFyears) {
   plot (x = month (select (filter (monthlyMetData,  year (date) == iYear), date) [[1]]),
         y = select (filter (monthlyMetData,  year (date) == iYear), prec) [[1]], 
         col = '#80b1d3', lwd = 2, typ = 'l', las = 1, xlab = '', ylab = '',
-        ylim = c (0, 240), axes = FALSE)
+        ylim = c (0, 240), axes = FALSE, lty = 2)
   axis (side = 4, las = 1, col = '#80b1d3', col.axis = '#80b1d3')
   mtext (side = 4, line = 3, text = 'Precipitation (mm)', 
          col = '#80b1d3')
@@ -118,10 +120,13 @@ for (iYear in IADFyears) {
   plot (x = month (select (filter (monthlyMetData,  year (date) == iYear), date) [[1]]),
         y = select (filter (monthlyMetData,  year (date) == iYear), vpd) [[1]],
         col = '#fc8d62', lwd = 2, typ = 'l', las = 1, xlab = '', ylab = '',
-        ylim = c (0, 0.8), axes = FALSE, lty = 2)
+        ylim = c (0, 0.8), axes = FALSE, lty = 3)
   axis (side = 2, line = 5, las = 1, col = '#fc8d62', col.axis = '#fc8d62')
   mtext (side = 2, line = 8, text = 'VPD (kPa)', 
          col = '#fc8d62')
 }
+legend (x = 1, y = 0.8, legend = c ('Air temperature','Precipitation','VPD'), lty = 1:3, 
+        col = c ('#c90016','#80b1d3','#fc8d62'), box.lty = 0)
+dev.off ()
 #========================================================================================
 
