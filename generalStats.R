@@ -9,6 +9,7 @@ library ('caTools')
 library ('glmnet')
 library ('dominanceanalysis')
 library ('boot')
+if (!existsFunction ('tibble')) library ('tidyverse')
 
 # Download and read the data
 #----------------------------------------------------------------------------------------
@@ -20,55 +21,79 @@ source ('plotingFunctions.R')
 
 # Wrangle data into long format with all possible explanatory variable for presence data
 #----------------------------------------------------------------------------------------
-temp1 <- data %>% filter (Year < 2017) %>% filter (DABH_1 %in% 1:2) %>% 
+temp1 <- data %>% dplyr::filter (Year < 2017, DABH_1 %in% 1:2) %>% 
   mutate (WoodAge = WoodAgeBH, RingWidth = RingWidthBH_1, TOP = FALSE, BRANCH = FALSE, 
-          densityAnomaly = TRUE)
-temp2 <- data %>% filter (Year < 2017) %>% filter (DABH_2 %in% 1:2) %>% 
+          densityAnomaly = TRUE, pos1 = PositionDABH_1.1, pos2 = PositionDABH_1.2)
+temp2 <- data %>% dplyr::filter (Year < 2017, DABH_2 %in% 1:2) %>% 
   mutate (WoodAge = WoodAgeBH, RingWidth = RingWidthBH_2, TOP = FALSE, BRANCH = FALSE, 
-          densityAnomaly = TRUE)
-temp3 <- data %>% filter (Year < 2017) %>% filter (DABranch_1 %in% 1:2) %>% 
+          densityAnomaly = TRUE, pos1 = PositionDABH_2.1, pos2 = PositionDABH_2.2)
+temp3 <- data %>% dplyr::filter (Year < 2017, DABranch_1 %in% 1:2) %>% 
   mutate (WoodAge = WoodAgeBH, RingWidth = RingWidthNearBranch_1, TOP = FALSE, BRANCH = TRUE, 
-          densityAnomaly = TRUE)
-temp4 <- data %>% filter (Year < 2017) %>% filter (DABranch_2 %in% 1:2) %>% 
+          densityAnomaly = TRUE, pos1 = PositionDABranch_1.1, pos2 = PositionDABranch_1.2)
+temp4 <- data %>% dplyr::filter (Year < 2017, DABranch_2 %in% 1:2) %>% 
   mutate (WoodAge = WoodAgeBH, RingWidth = RingWidthNearBranch_2, TOP = FALSE, BRANCH = TRUE, 
-          densityAnomaly = TRUE)
-temp5 <- data %>% filter (Year < 2017) %>% filter (DA2010_2 %in% 1:2) %>% 
+          densityAnomaly = TRUE, pos1 = PositionDABranch_2.1, pos2 = PositionDABranch_2.2)
+temp5 <- data %>% dplyr::filter (Year < 2017, DA2010_2 %in% 1:2) %>% 
   mutate (WoodAge = WoodAgeBH, RingWidth = RingWidth2010_1, TOP = TRUE, BRANCH = FALSE, 
-          densityAnomaly = TRUE)
-temp6 <- data %>% filter (Year < 2017) %>% filter (DA2010_2 %in% 1:2) %>% 
+          densityAnomaly = TRUE, pos1 = PositionDA2010_1.1, pos2 = PositionDA2010_1.2)
+temp6 <- data %>% dplyr::filter (Year < 2017, DA2010_2 %in% 1:2) %>% 
   mutate (WoodAge = WoodAgeBH, RingWidth = RingWidth2010_2, TOP = TRUE, BRANCH = FALSE, 
-          densityAnomaly = TRUE)
+          densityAnomaly = TRUE, pos1 = PositionDA2010_2.1, pos2 = PositionDA2010_2.2)
 temp <- rbind (temp1, temp2, temp3, temp4, temp5, temp6)
 rm (temp1, temp2, temp3, temp4, temp5, temp6)
 
 
 # Wrangle data into long format with all possible explanatory variable for absence data
 #----------------------------------------------------------------------------------------
-tmp1 <- data %>% filter (Year < 2017) %>% filter (DABH_1 == 0) %>% 
+tmp1 <- data %>% dplyr::filter (Year < 2017, DABH_1 == 0) %>% 
   mutate (WoodAge = WoodAgeBH, RingWidth = RingWidthBH_1, TOP = FALSE, BRANCH = FALSE, 
-          densityAnomaly = FALSE)
-tmp2 <- data %>% filter (Year < 2017) %>% filter (DABH_2 == 0) %>% 
+          densityAnomaly = FALSE, pos1 = PositionDABH_1.1, pos2 = PositionDABH_1.2)
+tmp2 <- data %>% dplyr::filter (Year < 2017, DABH_2 == 0) %>% 
   mutate (WoodAge = WoodAgeBH, RingWidth = RingWidthBH_2, TOP = FALSE, BRANCH = FALSE, 
-          densityAnomaly = FALSE)
-tmp3 <- data %>% filter (Year < 2017) %>% filter (DABranch_1 == 0) %>% 
+          densityAnomaly = FALSE, pos1 = PositionDABH_2.1, pos2 = PositionDABH_2.2)
+tmp3 <- data %>% dplyr::filter (Year < 2017, DABranch_1 == 0) %>% 
   mutate (WoodAge = WoodAgeBH, RingWidth = RingWidthNearBranch_1, TOP = FALSE, BRANCH = TRUE, 
-          densityAnomaly = FALSE)
-tmp4 <- data %>% filter (Year < 2017) %>% filter (DABranch_2 == 0) %>% 
+          densityAnomaly = FALSE, pos1 = PositionDABranch_1.1, pos2 = PositionDABranch_1.2)
+tmp4 <- data %>% dplyr::filter (Year < 2017, DABranch_2 == 0) %>% 
   mutate (WoodAge = WoodAgeBH, RingWidth = RingWidthNearBranch_2, TOP = FALSE, BRANCH = TRUE, 
-          densityAnomaly = FALSE)
-tmp5 <- data %>% filter (Year < 2017) %>% filter (DA2010_2 == 0) %>% 
+          densityAnomaly = FALSE, pos1 = PositionDABranch_2.1, pos2 = PositionDABranch_2.2)
+tmp5 <- data %>% dplyr::filter (Year < 2017, DA2010_2 == 0) %>% 
   mutate (WoodAge = WoodAgeBH, RingWidth = RingWidth2010_1, TOP = TRUE, BRANCH = FALSE, 
-          densityAnomaly = FALSE)
-tmp6 <- data %>% filter (Year < 2017) %>% filter (DA2010_2 == 0) %>% 
+          densityAnomaly = FALSE, pos1 = PositionDA2010_1.1, pos2 = PositionDA2010_1.2)
+tmp6 <- data %>% dplyr::filter (Year < 2017, DA2010_2 == 0) %>% 
   mutate (WoodAge = WoodAgeBH, RingWidth = RingWidth2010_2, TOP = TRUE, BRANCH = FALSE, 
-          densityAnomaly = FALSE)
+          densityAnomaly = FALSE, pos1 = PositionDA2010_2.1, pos2 = PositionDA2010_2.2)
 tmp <- rbind (tmp1, tmp2, tmp3, tmp4, tmp5, tmp6)
 rm (tmp1, tmp2, tmp3, tmp4, tmp5, tmp6)
 
 # Combine presence and absence data
 #----------------------------------------------------------------------------------------
-longData <- rbind (temp, tmp) %>% select (densityAnomaly, Year, TreeID, WoodAge,
-                                          RingWidth, TOP, BRANCH)
+longData <- rbind (temp, tmp) %>% 
+  select (densityAnomaly, Year, TreeID, WoodAge, RingWidth, TOP, BRANCH, Pos1, Pos2) %>%
+  mutate (posPer = pos1 / RingWidth * 100.0)
+
+# H1A : Does the position in the ring vary between trees in the same stand during the same year?
+# H1B : Does the position vary between years?
+# Extract relevant data
+#----------------------------------------------------------------------------------------
+H1Data <- longData %>% filter (densityAnomaly) %>% select (Year, TreeID, posPer) %>% 
+  mutate (Year = factor (Year), TreeID = factor (TreeID)) 
+
+# Fit model to test whether the position in the ring as a function of tree ID and year 
+# of occurence
+#----------------------------------------------------------------------------------------
+library ('rethinking')
+H1m1 <- quap (
+  alist (
+    posPer ~ dnorm (mu, sigma),
+    mu = a + bY * Year + bTree * TreeID,
+    a ~ dnorm (50, 30),
+    c (bY, bT) ~ dnorm (1, 1), 
+    sigma ~ dexp (1)
+  ), data = H1Data 
+)
+precis (0)
+
 
 # Create comprehensive logistic model to test for various effects
 #----------------------------------------------------------------------------------------
