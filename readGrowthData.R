@@ -5,7 +5,7 @@
 
 # Load dependencies
 #----------------------------------------------------------------------------------------
-library ('googledrive')
+library ('googledrive') # to access the goolge spreadsheet with the data
 library ('readxl') 
 
 # Secify google user
@@ -23,9 +23,13 @@ if (user == 'TR') {
 #----------------------------------------------------------------------------------------
 fileID <- '1QwPjl2vji-KAcD1F92B814KXgFd7ZtJW3Do_TEDh67c'
 
+# Set operation to quiet to avoid messages when sourced
+#----------------------------------------------------------------------------------------
+options (googledrive_quiet = TRUE)
+
 # Download spreadsheet
 #----------------------------------------------------------------------------------------
-drive_download (file = as_id (fileID), verbose = FALSE, overwrite = TRUE); rm (fileID)
+drive_download (file = as_id (fileID), overwrite = TRUE); rm (fileID)
 
 # Read and delete downloaded data sheet
 #----------------------------------------------------------------------------------------
