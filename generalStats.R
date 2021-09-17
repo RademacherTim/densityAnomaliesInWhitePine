@@ -5,10 +5,7 @@
 
 # Load dependencies
 #----------------------------------------------------------------------------------------
-library ('caTools')
-library ('glmnet')
-library ('dominanceanalysis')
-library ('boot')
+if (!existsFunction ('stan')) library ('rstan') # to fit more complex Bayesian models
 if (!existsFunction ('ulam')) library ('rethinking') # to fit Bayesian model
 if (!existsFunction ('tibble')) library ('tidyverse') # to wrangle data
 
@@ -104,6 +101,7 @@ H1Data <- longData %>%
 # Fit model to test whether the position in the ring varies as a function of 
 # tree ID and/or year of formation
 #----------------------------------------------------------------------------------------
+set.seed (1358) # the summer of 1353
 H1m1 <- ulam (
   alist (
     PosPerStd ~ dnorm (muR, sigmaR),
@@ -113,9 +111,8 @@ H1m1 <- ulam (
     sigmaR ~ dexp (1)
   ), data = H1Data, chains = 4, cores = 4, cmdstan = TRUE
 )
-traceplot (H1m1)
-trankplot (H1m1)
-precis (H1m1, depth = 2)
+#traceplot (H1m1)
+#trankplot (H1m1)
 post <- extract.samples (H1m1)
 muPost <- mean ((apply (post$aT, 1, mean) + apply (post$aY, 1, mean)) * sigmaPrior + muPrior)
 PIPost <- PI (link (H1m1, post = post), prob = 0.9) * sigmaPrior + muPrior
@@ -164,21 +161,21 @@ dev.off ()
 
 # Of the 41 trees four had substantially earlier IADFs, while one had a tendency 
 # to form IADFs later in the ring. 
-# IADFs are placed earlier by -0.47 [-0.86, -0.07] in Tree 11 
-# IADFs are placed earlier by -0.48 [-0.88, -0.06] in Tree 19 
-# IADFs are placed earlier by -0.42 [-0.79, -0.05] in Tree 23
-# IDAFs are placed later by 0.46 [0.02, 0.87] in Tree 27
-# IADFs are placed earlier by -0.41 [-0.75, -0.06] in Tree 36
-# But none had later IADFs
+precis (H1m1, depth = 2)
+# IADFs are placed earlier by 74.03 [69.32, 78.74] in Tree 11 
+# IADFs are placed earlier by 73.80 [68.73, 78.98] in Tree 19 
+# IADFs are placed earlier by 74.62 [70.38, 78.74] in Tree 23
+# IDAFs are placed later   by 85.10 [80.04, 90.16] in Tree 27
+# IADFs are placed earlier by 74.74 [70.85, 78.63] in Tree 36
 
 # Of the 17 years with IADFs 6 had either particularly early or late occurrences 
 # of IADFs.
-# IADFs comparatively late in 1998 compared to the multi-year mean by 0.52 [0.05, 0.99]
-# IADFs comparatively late in 2001 compared to the multi-year mean by 0.51 [0.32, 0.71]
-# IADFs comparatively late in 2010 compared to the multi-year mean by 0.74 [0.41, 1.07]
-# IADFs comparatively early in 2013 compared to the multi-year mean by -0.39 [-0.63, -0.15]
-# IADFs comparatively early in 2014 compared to the multi-year mean by -0.63 [-1.26, -0.03]
-# IADFs comparatively early in 2016 compared to the multi-year mean by -0.25 [-0.46, -0.05]
+# IADFs comparatively late  in 1998 compared to the multi-year mean by 85.69 [80.04, 91.46]
+# IADFs comparatively late  in 2001 compared to the multi-year mean by 85.69 [83.22, 88.28]
+# IADFs comparatively late  in 2010 compared to the multi-year mean by 88.16 [84.28, 92.05]
+# IADFs comparatively early in 2013 compared to the multi-year mean by 74.98 [72.19, 77.68]
+# IADFs comparatively early in 2014 compared to the multi-year mean by 72.15 [64.73, 79.57]
+# IADFs comparatively early in 2016 compared to the multi-year mean by 76.62 [74.27, 78.98]
 
 
 # Wrangle data to test the second hypothesis
@@ -197,6 +194,7 @@ H2Data <- longData %>% select (-TreeID, -WoodAge,-Pos1, -Pos2, -PosPer) %>%
 # Fit a logistic model to test whether ring widths, year of occurrence, being at the top 
 # of the tree and/or near a branch affects the likelihood of formation of an IADFS
 #----------------------------------------------------------------------------------------
+set.seed (1353)
 H2m1 <- ulam (
   alist (
     densityAnomaly ~ dbinom (1, p),
@@ -206,7 +204,8 @@ H2m1 <- ulam (
 )
 #trankplot (H2m1)
 #traceplot (H2m1)
-precis (H2m1, depth = 2)
+#precis (H2m1, depth = 2)
+set.seed (1353)
 H2m2 <- ulam (
   alist (
     densityAnomaly ~ dbinom (1, p),
@@ -215,9 +214,10 @@ H2m2 <- ulam (
     c (bR) ~ dnorm (0, 10)
   ), data = H2Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
 )
-trankplot (H2m2)
-traceplot (H2m2)
-precis (H2m2, depth = 2)
+#trankplot (H2m2)
+#traceplot (H2m2)
+#precis (H2m2, depth = 2)
+set.seed (1353)
 H2m3 <- ulam (
   alist (
     densityAnomaly ~ dbinom (1, p),
@@ -226,7 +226,10 @@ H2m3 <- ulam (
     c (bR, bRY) ~ dnorm (0, 10)
   ), data = H2Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
 )
-precis (H2m3, depth = 2)
+#trankplot (H2m3)
+#traceplot (H2m3)
+#precis (H2m3, depth = 2)
+set.seed (1353)
 H2m4 <- ulam (
   alist (
     densityAnomaly ~ dbinom (1, p),
@@ -235,7 +238,9 @@ H2m4 <- ulam (
     c (bR, bRY, bT) ~ dnorm (0, 10)
   ), data = H2Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
 )
-precis (H2m4, depth = 2)
+#trankplot (H2m4)
+#traceplot (H2m4)
+#precis (H2m4, depth = 2)
 H2m5 <- ulam (
   alist (
     densityAnomaly ~ dbinom (1, p),
@@ -244,6 +249,9 @@ H2m5 <- ulam (
     c (bR, bRY, bB) ~ dnorm (0, 10)
   ), data = H2Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
 )
+#trankplot (H2m5)
+#traceplot (H2m5)
+#precis (H2m5, depth = 2)
 H2m6 <- ulam (
   alist (
     densityAnomaly ~ dbinom (1, p),
@@ -252,8 +260,8 @@ H2m6 <- ulam (
     c (bR, bRY, bT, bB) ~ dnorm (0, 10)
   ), data = H2Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
 )
-trankplot (H2m6)
-traceplot (H2m6)
+#trankplot (H2m6)
+#traceplot (H2m6)
 precis (H2m6, depth = 2)
 compare (H2m1, H2m2, H2m3, H2m4, H2m5, H2m6, func = 'WAIC')
 
@@ -283,19 +291,30 @@ H3Data <- H3Data %>% mutate (LenStd = (Len - muLen) / sigmaLen) %>% ungroup ()
 
 # Test hypothesis (H3) about the conservation of the circumferential arc of IADFs
 #----------------------------------------------------------------------------------------
-H3m1 <- ulam (
-  alist (
-    ArcStd ~ dnorm (muA, sigmaA),
-    muA <- a0 + bH * h,
-    a0 ~ dnorm (0, 10),
-    bH ~ dnorm (0, 10),
-    sigmaA ~ dexp (1)
-  ), data = H3Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
+# TR - Need to constrain the distribution because at the moment the posterior 
+# distribution has angles larger than 360 degrees for some years!!!
+set.seed (42)
+H3m1 <- stan (
+  file = 'codeH3m1.stan', # Stan program
+  data = H3Data %>% select (-Year, -TreeID, -ArcStd, -Len, -LenStd, -RingWidth) %>%
+    mutate (h = ifelse (h == 'TOP', 1, 2), 
+            Arc = (Arc * pi / 180) - pi), # named list of data with arc in radians from -pi to pi
+  chains = 4,             # number of Markov chains
+  warmup = 2000,          # number of warmup iterations per chain
+  iter = 4000,            # total number of iterations per chain
+  cores = 4,              # number of cores (could use one per chain)
+  refresh = 0             # no progress shown
 )
+postArc <- extract.samples (H3m1)
+print(H3m1, probs = c(.05,.95), digits=3)
+trankplot (H3m1)
+traceplot (H3m1)
+precis (H3m1, depth = 2)
+
 H3m1years <- ulam (
   alist (
     ArcStd ~ dnorm (muA, sigmaA),
-    muA <- a0 [Year] + bH * h,
+    muA <- a0 [Year] + aH [h],
     a0 [Year] ~ dnorm (0, 10),
     bH ~ dnorm (0, 10),
     sigmaA ~ dexp (1)
@@ -304,7 +323,7 @@ H3m1years <- ulam (
 H3m1trees <- ulam (
   alist (
     ArcStd ~ dnorm (muA, sigmaA),
-    muA <- a0 [TreeID] + bH * h,
+    muA <- a0 [TreeID] + aH * [h],
     a0 [TreeID] ~ dnorm (0, 10),
     bH ~ dnorm (0, 10),
     sigmaA ~ dexp (1)
