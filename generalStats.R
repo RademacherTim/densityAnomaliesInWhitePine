@@ -121,7 +121,7 @@ PIPost <- PI (link (H1m1, post = post), prob = 0.9) * sigmaPrior + muPrior
 #----------------------------------------------------------------------------------------
 png (file = './fig/MeanPositionByTreeID.png', width = 600, height = 400) 
 par (mfrow = c (1, 1), mar = c (4, 4, 1, 1))
-plot (x = precis (H1m1, depth = 2)$mean [1:41] * sigmaPrior + muPrior,
+plot (x = precis (H1m1, depth = 2, prob - 0.9)$mean [1:41] * sigmaPrior + muPrior,
       y = 1:41,
       ylab = '',
       xlab = '', las = 1, xlim = c (0, 100), 
@@ -129,10 +129,10 @@ plot (x = precis (H1m1, depth = 2)$mean [1:41] * sigmaPrior + muPrior,
 abline (v = muPost, lwd = 2, col = '#66666666')
 rect (xleft = PIPost [1], xright = PIPost [2], ybottom = 0, ytop = 42, 
       col = '#aaaaaa22', lty = 0)
-segments (x0 = precis (H1m1, depth = 2) [1:41,3] * sigmaPrior + muPrior,
-          x1 = precis (H1m1, depth = 2) [1:41,4] * sigmaPrior + muPrior,
+segments (x0 = precis (H1m1, depth = 2, prob = 0.9) [1:41,3] * sigmaPrior + muPrior,
+          x1 = precis (H1m1, depth = 2, prob = 0.9) [1:41,4] * sigmaPrior + muPrior,
           y0 = 1:41, col = '#F38D48')
-points (x = precis (H1m1, depth = 2)$mean [1:41] * sigmaPrior + muPrior,
+points (x = precis (H1m1, depth = 2, prob = 0.9)$mean [1:41] * sigmaPrior + muPrior,
         y = 1:41, pch = 19, col = '#F38D48')
 axis (side = 1)
 axis (side = 2, las = 1)
@@ -142,7 +142,7 @@ dev.off ()
 #----------------------------------------------------------------------------------------
 png (file = './fig/MeanPositionByYear.png', width = 600, height = 400)
 par (mfrow = c (1, 1), mar = c (4, 4, 1, 1))
-plot (x = precis (H1m1, depth = 2)$mean [42:58] * sigmaPrior + muPrior,
+plot (x = precis (H1m1, depth = 2, prob = 0.9)$mean [42:58] * sigmaPrior + muPrior,
       y = levels (H1Data$Year),
       ylab = '',
       xlab = '', las = 1, xlim = c (0, 100), 
@@ -150,10 +150,10 @@ plot (x = precis (H1m1, depth = 2)$mean [42:58] * sigmaPrior + muPrior,
 abline (v = muPost, lwd = 2, col = '#66666666')
 rect (xleft = PIPost [1], xright = PIPost [2], ybottom = 1998, ytop = 2017, 
       col = '#aaaaaa22', lty = 0)
-segments (x0 = precis (H1m1, depth = 2) [42:58,3] * sigmaPrior + muPrior,
-          x1 = precis (H1m1, depth = 2) [42:58,4] * sigmaPrior + muPrior,
+segments (x0 = precis (H1m1, depth = 2, prob = 0.9) [42:58,3] * sigmaPrior + muPrior,
+          x1 = precis (H1m1, depth = 2, prob = 0.9) [42:58,4] * sigmaPrior + muPrior,
           y0 = as.numeric (levels (H1Data$Year)), col = '#F38D48')
-points (x = precis (H1m1, depth = 2)$mean [42:58] * sigmaPrior + muPrior,
+points (x = precis (H1m1, depth = 2, prob = 0.9)$mean [42:58] * sigmaPrior + muPrior,
         y = levels (H1Data$Year), pch = 19, col = '#F38D48')
 axis (side = 1)
 axis (side = 2, las = 1)
@@ -181,13 +181,13 @@ precis (H1m1, depth = 2)
 # Wrangle data to test the second hypothesis
 #----------------------------------------------------------------------------------------
 muPrior <- longData %>% select (RingWidth) %>% 
-  summarise (mean = mean (RingWidth, na.rm = TRUE))
+  summarise (mean = mean (RingWidth, na.rm = TRUE)) %>% unlist ()
 sigmaPrior <- longData %>% select (RingWidth) %>% 
-  summarise (sd = sd (RingWidth, na.rm = TRUE))
+  summarise (sd = sd (RingWidth, na.rm = TRUE)) %>% unlist ()
 H2Data <- longData %>% select (-TreeID, -WoodAge,-Pos1, -Pos2, -PosPer) %>%
-  mutate (Year = as_factor (Year),
-          TOP = as_factor (TOP),
-          BRANCH = as_factor (BRANCH),
+  mutate (Year = as.integer (as_factor (Year)),
+          TOP = as.integer (as_factor (TOP)) + 1,
+          BRANCH = as.integer (as_factor (BRANCH)) + 1,
           RingWidth = (RingWidth - muPrior [[1]]) / sigmaPrior [[1]]) %>% 
   drop_na ()
 
@@ -199,76 +199,114 @@ H2m1 <- ulam (
   alist (
     densityAnomaly ~ dbinom (1, p),
     logit (p) <-  aY [Year],
-    aY [Year] ~ dnorm (0, 10)
+    aY [Year] ~ dnorm (0, 1.5)
   ), data = H2Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
 )
 #trankplot (H2m1)
 #traceplot (H2m1)
-#precis (H2m1, depth = 2)
+#precis (H2m1, depth = 2, prob = 0.9)
 set.seed (1353)
 H2m2 <- ulam (
   alist (
     densityAnomaly ~ dbinom (1, p),
     logit (p) <- aY [Year] + bR * RingWidth,
-    aY [Year] ~ dnorm (0, 10),
-    c (bR) ~ dnorm (0, 10)
+    aY [Year] ~ dnorm (0, 1.5),
+    bR ~ dnorm (0, 0.3)
   ), data = H2Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
 )
 #trankplot (H2m2)
 #traceplot (H2m2)
-#precis (H2m2, depth = 2)
+#precis (H2m2, depth = 2, prob = 0.9)
 set.seed (1353)
 H2m3 <- ulam (
   alist (
     densityAnomaly ~ dbinom (1, p),
     logit (p) <- aY [Year] + bR * RingWidth + bRY * RingWidth * Year,
-    aY [Year] ~ dnorm (0, 10),
-    c (bR, bRY) ~ dnorm (0, 10)
+    aY [Year] ~ dnorm (0, 1.5),
+    c (bR, bRY) ~ dnorm (0, 0.3)
   ), data = H2Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
 )
 #trankplot (H2m3)
 #traceplot (H2m3)
-#precis (H2m3, depth = 2)
+#precis (H2m3, depth = 2, prob = 0.9)
 set.seed (1353)
 H2m4 <- ulam (
   alist (
     densityAnomaly ~ dbinom (1, p),
     logit (p) <- aY [Year] + bR * RingWidth + bRY * RingWidth * Year + bT * TOP,
-    aY [Year] ~ dnorm (0, 10),
-    c (bR, bRY, bT) ~ dnorm (0, 10)
+    aY [Year] ~ dnorm (0, 1.5),
+    c (bR, bRY, bT) ~ dnorm (0, 0.3)
   ), data = H2Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
 )
 #trankplot (H2m4)
 #traceplot (H2m4)
-#precis (H2m4, depth = 2)
+#precis (H2m4, depth = 2, prob = 0.9)
+# bT is very dependent on its prior
+set.seed (1353)
 H2m5 <- ulam (
   alist (
     densityAnomaly ~ dbinom (1, p),
     logit (p) <- aY [Year] + bR * RingWidth + bRY * RingWidth * Year + bB * BRANCH,
-    aY [Year] ~ dnorm (0, 10),
-    c (bR, bRY, bB) ~ dnorm (0, 10)
+    aY [Year] ~ dnorm (0, 1.5),
+    c (bR, bRY, bB) ~ dnorm (0, 0.3)
   ), data = H2Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
 )
 #trankplot (H2m5)
 #traceplot (H2m5)
-#precis (H2m5, depth = 2)
+#precis (H2m5, depth = 2, prob = 0.9)
+set.seed (1353)
 H2m6 <- ulam (
   alist (
     densityAnomaly ~ dbinom (1, p),
     logit (p) <- aY [Year] + bR * RingWidth + bRY * RingWidth * Year + bT * TOP + bB * BRANCH,
-    aY [Year] ~ dnorm (0, 10),
-    c (bR, bRY, bT, bB) ~ dnorm (0, 10)
+    aY [Year] ~ dnorm (0, 1.5),
+    c (bR, bRY, bT, bB) ~ dnorm (0, 0.3)
   ), data = H2Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
 )
 #trankplot (H2m6)
 #traceplot (H2m6)
-precis (H2m6, depth = 2)
+precis (H2m6, depth = 2, prob = 0.9)
 compare (H2m1, H2m2, H2m3, H2m4, H2m5, H2m6, func = 'WAIC')
 
-# 
-#----------------------------------------------------------------------------------------
 
-# Wrangle data to test (H3) about the circumferential arc of IADFs
+# Selection of years with high intercepts
+#----------------------------------------------------------------------------------------
+IADFproneYears <- c (1999, 2002, 2012, 2013, 2016)
+IADFproneYearIndices <- c (4, 7, 17, 18, 21)
+
+# Calculate the effect on posterior probability of being near a branch ot at the top of 
+# the tree in years with many IADFs
+#----------------------------------------------------------------------------------------
+set.seed (1353)
+postH2 <- extract.samples (H2m6)
+effect_BRA <- inv_logit (apply (postH2$aY [, IADFproneYearIndices], 1, mean) + 
+                           postH2$bR * 0 + # mean ring width is 0 as the distribution was centred and scaled
+                           postH2$bRY * 0 * 1.0 + # mean ring width is 0 as the distribution was centred and scaled
+                           postH2$bB * 1.0 + 
+                           postH2$bT * 0.0) - 
+  inv_logit (apply (postH2$aY [, IADFproneYearIndices], 1, mean) + 
+             postH2$bR * 0 + 
+             postH2$bRY * 0 * 1.0 + 
+             postH2$bB * 0.0 + 
+             postH2$bT * 0.0)
+mean (effect_BRA)
+PI (effect_BRA, prob = 0.9)
+effect_TOP <- inv_logit (apply (postH2$aY [, IADFproneYearIndices], 1, mean) + 
+                         postH2$bR * 0 + 
+                         postH2$bRY * 0 * 1.0 + 
+                         postH2$bB * 0.0 + 
+                         postH2$bT * 1.0) - 
+  inv_logit (apply (postH2$aY [, IADFproneYearIndices], 1, mean) + 
+             postH2$bR * 0 + 
+             postH2$bRY * 0 * 1.0 + 
+             postH2$bB * 0.0 + 
+             postH2$bT * 0.0)
+mean (effect_TOP)
+PI (effect_TOP, prob = 0.9)
+
+#----------------------------------------------------------------------------------------
+# Wrangle data to test (H3) about difference in the circumferential arc and/or the length
+# of the arc of IADFs at breast height versus at the top of the tree
 #----------------------------------------------------------------------------------------
 temp <- data [c (1:2, 6:9, 46:47)] %>% 
   pivot_longer (cols = 7:8, names_to = 'h', values_to = 'Arc') %>%
@@ -289,10 +327,29 @@ muLen <- mean (H3Data$Len)
 sigmaLen <- sd (H3Data$Len)
 H3Data <- H3Data %>% mutate (LenStd = (Len - muLen) / sigmaLen) %>% ungroup ()
 
+# Simulate some data to make sure the test works fine
+#----------------------------------------------------------------------------------------
+set.seed (1353)
+sigmaA <- rexp (1e3, 1)
+h <- sample.int (2, 1e3, replace = TRUE)
+aH <- rnorm (1e3, 1.74, 0.34)
+a0 <- rnorm (1e3, 1.74, 0.34)
+muA <- a0 + aH *(h-1)
+Arc <- rnorm (1e3, muA, sigmaA)
+
+H3m1 <- stan (
+  file = 'codeH3m1.stan', # Stan program
+  data = list (h = h, Arc = Arc), # named list of data with arc in radians from -pi to pi
+  chains = 1,             # number of Markov chains
+  warmup = 1000,          # number of warmup iterations per chain
+  iter = 2000,            # total number of iterations per chain
+  cores = 4,              # number of cores (could use one per chain)
+  refresh = 0             # no progress shown
+)
+precis (H3m1, depth = 2, prob = 0.9)
+
 # Test hypothesis (H3) about the conservation of the circumferential arc of IADFs
 #----------------------------------------------------------------------------------------
-# TR - Need to constrain the distribution because at the moment the posterior 
-# distribution has angles larger than 360 degrees for some years!!!
 set.seed (42)
 H3m1 <- stan (
   file = 'codeH3m1.stan', # Stan program
@@ -306,7 +363,6 @@ H3m1 <- stan (
   refresh = 0             # no progress shown
 )
 postArc <- extract.samples (H3m1)
-print(H3m1, probs = c(.05,.95), digits=3)
 trankplot (H3m1)
 traceplot (H3m1)
 precis (H3m1, depth = 2)
