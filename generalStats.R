@@ -776,16 +776,16 @@ compare (H2m3, H2m2, H2mRW, H2mYEAR)
 temp <- data [c (1:2, 6:9, 46:47)] %>% 
   pivot_longer (cols = 7:8, names_to = 'h', values_to = 'Arc') %>%
   drop_na (Arc) %>%
-  mutate (Year = as_factor (Year),
-          TreeID = as_factor (TreeID),
-          h = as_factor (ifelse (h == 'ArcBH', 'BH', 'TOP'))) 
+  mutate (Year = as.integer (as_factor (Year)),
+          TreeID = as.integer (as_factor (TreeID)), # NB. 1 is Top and 2 is BH
+          h = as.integer (as_factor (ifelse (h == 'ArcBH', 'BH', 'TOP')))) 
 muPrior <- temp %>% select (Arc) %>% summarize (muPior = mean (Arc)) %>% unlist ()
 sigmaPrior <- temp %>% select (Arc) %>% summarize (sigmaPior = sd (Arc)) %>% unlist ()
 H3Data <- temp %>% rowwise () %>% 
   mutate (RingWidthBH = mean (c (RingWidthBH_1, RingWidthBH_2), na.rm = TRUE),
           RingWidth2010 = mean (c (RingWidth2010_1, RingWidth2010_2), na.rm = TRUE)) %>%
   mutate (RingWidth = ifelse (h == 'TOP', RingWidth2010, RingWidthBH)) %>%
-  mutate (Len = Arc * (pi / 180) * RingWidth) %>%
+  mutate (Len = Arc * (pi / 180) * RingWidth) %>% # length in 
   mutate (ArcStd = (Arc - muPrior) / sigmaPrior) %>%
   select (Year, TreeID, h, Arc, ArcStd, Len, RingWidth) 
 muLen <- mean (H3Data$Len)
@@ -876,11 +876,38 @@ H3m2 <- ulam (
 trankplot (H3m2)
 traceplot (H3m2)
 precis (H3m2, depth = 2)
+set.seed (40)
+H3m3 <- ulam (
+  alist (
+    LenStd ~ dnorm (muA, sigmaA),
+    muA <- aT [TreeID] + aY [Year] + aH [h],
+    aT [TreeID] ~ dnorm (0, 10),
+    aY [Year] ~ dnorm (0, 10),
+    aH [h] ~ dnorm (0, 10),
+    sigmaA ~ dexp (1)
+  ), data = H3Data, chains = 4, cores = 4, cmdstan = TRUE, iter = 4000, warmup = 2000,
+)
+trankplot (H3m3)
+traceplot (H3m3)
+precis (H3m3, depth = 2)
 
-# Extract posterior distributions and to draw figures of the length of arc
+# Calculate data mean by height
 #----------------------------------------------------------------------------------------
-postLen <- extract.samples (H3m2years)
+H3Data %>% group_by (h) %>% 
+  summarise (meanArc = mean (Arc), 
+             sdArc = sd (Arc),
+             PIArcLow = PI (Arc, prob = 0.9) [1], 
+             PIArcUpp = PI (Arc, prob = 0.9) [2], 
+             meanLen = mean (Len), 
+             sdLen = sd (Len),
+             PILenLow = PI (Len, prob = 0.9) [1], 
+             PILenUpp = PI (Len, prob = 0.9) [2])
 
+# Calculate data mean by tree and year
+#----------------------------------------------------------------------------------------
+H3Data %>% group_by (TreeID) %>% summarise (meanArc = mean (Arc), sdArc = sd (Arc))
+H3Data %>% group_by (Year) %>% summarise (meanArc = mean (Arc), sdArc = sd (Arc))
+H3Data %>% group_by (TreeID, Year) %>% summarise (meanArc = mean (Arc), sdArc = sd (Arc))
 
 # Median number of anomalies per year
 #----------------------------------------------------------------------------------------
