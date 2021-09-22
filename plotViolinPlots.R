@@ -7,7 +7,6 @@
 source ('readGrowthData.R')
 library ('tidyverse')
 library ('vioplot')
-library ('car')
 
 # Plot graph of density distribution by ring width with one panel for each height and a 
 # row for all data and height frequency years only

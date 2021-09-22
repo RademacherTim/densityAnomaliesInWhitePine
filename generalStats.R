@@ -186,37 +186,100 @@ sigmaPrior <- longData %>% select (RingWidth) %>%
   summarise (sd = sd (RingWidth, na.rm = TRUE)) %>% unlist ()
 H2Data <- longData %>% select (-TreeID, -WoodAge,-Pos1, -Pos2, -PosPer) %>%
   mutate (Year = as.integer (as_factor (Year)),
-          TOP = as.integer (as_factor (TOP)) + 1,
-          BRANCH = as.integer (as_factor (BRANCH)) + 1,
+          TOP = as.integer (as_factor (TOP)),
+          BRANCH = as.integer (as_factor (BRANCH)),
           RingWidth = (RingWidth - muPrior [[1]]) / sigmaPrior [[1]]) %>% 
   drop_na ()
+
+# Selection of years with high intercepts
+#----------------------------------------------------------------------------------------
+IADFproneYears <- c (1999, 2002, 2012, 2013, 2016)
+IADFproneYearIndices <- c (4, 7, 17, 18, 21)
 
 # Fit a logistic model to test whether ring widths, year of occurrence, being at the top 
 # of the tree and/or near a branch affects the likelihood of formation of an IADFS
 #----------------------------------------------------------------------------------------
 set.seed (1353)
-H2m1 <- ulam (
+H2mBRA <- ulam (
+  alist (
+    densityAnomaly ~ dbinom (1, p),
+    logit (p) <-  aB [BRANCH],
+    aB [BRANCH] ~ dnorm (0, 1.5) # this is a pretty flat (uninformative prior)
+  ), data = H2Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
+)
+#trankplot (H2mBRA)
+#traceplot (H2mBRA)
+#precis (H2mBRA, depth = 2, prob = 0.9)
+set.seed (1353)
+H2mTOP <- ulam (
+  alist (
+    densityAnomaly ~ dbinom (1, p),
+    logit (p) <-  aT [TOP],
+    aT [TOP] ~ dnorm (0, 1.5) # this is a pretty flat (uninformative prior)
+  ), data = H2Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
+)
+#trankplot (H2mTOP)
+#traceplot (H2mTOP)
+#precis (H2mTOP, depth = 2, prob = 0.9)
+set.seed (1353)
+H2mYEAR <- ulam (
   alist (
     densityAnomaly ~ dbinom (1, p),
     logit (p) <-  aY [Year],
-    aY [Year] ~ dnorm (0, 1.5)
+    aY [Year] ~ dnorm (0, 1.5) # this is a pretty flat (uninformative prior)
   ), data = H2Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
 )
-#trankplot (H2m1)
-#traceplot (H2m1)
-#precis (H2m1, depth = 2, prob = 0.9)
+#trankplot (H2mYEAR)
+#traceplot (H2mYEAR)
+#precis (H2mYEAR, depth = 2, prob = 0.9)
+set.seed (1353)
+H2mRW <- ulam (
+  alist (
+    densityAnomaly ~ dbinom (1, p),
+    logit (p) <- bR * RingWidth,
+    bR ~ dnorm (0, 0.5)
+  ), data = H2Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
+)
+#trankplot (H2mRW)
+#traceplot (H2mRW)
+#precis (H2mRW, depth = 2, prob = 0.9)
+set.seed (1353)
+postH2mRW <- extract.samples (H2mRW)
+effect_3.5RW5.5 <- 
+  inv_logit (postH2mRW$bR * 0.4775436) - 
+  inv_logit (postH2mRW$bR * -0.4780113)
+mean (effect_3.5RW5.5)
+PI (effect_3.5RW5.5, prob = 0.9)
+
 set.seed (1353)
 H2m2 <- ulam (
   alist (
     densityAnomaly ~ dbinom (1, p),
     logit (p) <- aY [Year] + bR * RingWidth,
     aY [Year] ~ dnorm (0, 1.5),
-    bR ~ dnorm (0, 0.3)
+    bR ~ dnorm (0, 0.5)
   ), data = H2Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
 )
 #trankplot (H2m2)
 #traceplot (H2m2)
 #precis (H2m2, depth = 2, prob = 0.9)
+set.seed (1353)
+postH2mRWY <- extract.samples (H2m2)
+effect_3.5RWY5.5 <- 
+  inv_logit (apply (postH2mRWY$aY [, IADFproneYearIndices], 1, mean) + 
+             postH2mRWY$bR * 0.4775436) - 
+  inv_logit (apply (postH2mRWY$aY [, IADFproneYearIndices], 1, mean) + 
+             postH2mRWY$bR * -0.4780113)
+mean (effect_3.5RWY5.5)
+PI (effect_3.5RWY5.5, prob = 0.9)
+effect_3.5RWY5.5 <- 
+  inv_logit (apply (postH2mRWY$aY [, -IADFproneYearIndices], 1, mean) + 
+               postH2mRWY$bR * 0.4775436) - 
+  inv_logit (apply (postH2mRWY$aY [, -IADFproneYearIndices], 1, mean) + 
+               postH2mRWY$bR * -0.4780113)
+mean (effect_3.5RWY5.5)
+PI (effect_3.5RWY5.5, prob = 0.9)
+
 set.seed (1353)
 H2m3 <- ulam (
   alist (
@@ -230,25 +293,38 @@ H2m3 <- ulam (
 #traceplot (H2m3)
 #precis (H2m3, depth = 2, prob = 0.9)
 set.seed (1353)
+postH2m3 <- extract.samples (H2m3)
+effect_3.5RWY25.5 <- 
+  inv_logit (apply (postH2mRWY$aY [, IADFproneYearIndices], 1, mean) + 
+             postH2m3$bR * 0.4775436 +
+             postH2m3$bRY * 0.4775436) - 
+  inv_logit (apply (postH2mRWY$aY [, IADFproneYearIndices], 1, mean) + 
+             postH2m3$bR * -0.4780113 +
+             postH2m3$bRY * -0.4780113)
+mean (effect_3.5RWY25.5)
+PI (effect_3.5RWY25.5, prob = 0.9)
+
+set.seed (1353)
 H2m4 <- ulam (
   alist (
     densityAnomaly ~ dbinom (1, p),
-    logit (p) <- aY [Year] + bR * RingWidth + bRY * RingWidth * Year + bT * TOP,
-    aY [Year] ~ dnorm (0, 1.5),
-    c (bR, bRY, bT) ~ dnorm (0, 0.3)
+    logit (p) <- aY [Year] + aT [TOP] + bR * RingWidth + bRY * RingWidth * Year,
+    aY [Year] ~ dnorm (0, 1.0),
+    aT [TOP] ~ dnorm (0, 1.0),
+    c (bR, bRY) ~ dnorm (0, 0.3)
   ), data = H2Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
 )
 #trankplot (H2m4)
 #traceplot (H2m4)
 #precis (H2m4, depth = 2, prob = 0.9)
-# bT is very dependent on its prior
 set.seed (1353)
 H2m5 <- ulam (
   alist (
     densityAnomaly ~ dbinom (1, p),
-    logit (p) <- aY [Year] + bR * RingWidth + bRY * RingWidth * Year + bB * BRANCH,
-    aY [Year] ~ dnorm (0, 1.5),
-    c (bR, bRY, bB) ~ dnorm (0, 0.3)
+    logit (p) <- aY [Year] + bR * RingWidth + bRY * RingWidth * Year + aB [BRANCH],
+    aY [Year] ~ dnorm (0, 1.0),
+    aB [BRANCH] ~ dnorm (0, 1.0),
+    c (bR, bRY) ~ dnorm (0, 0.3)
   ), data = H2Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
 )
 #trankplot (H2m5)
@@ -258,51 +334,440 @@ set.seed (1353)
 H2m6 <- ulam (
   alist (
     densityAnomaly ~ dbinom (1, p),
-    logit (p) <- aY [Year] + bR * RingWidth + bRY * RingWidth * Year + bT * TOP + bB * BRANCH,
-    aY [Year] ~ dnorm (0, 1.5),
-    c (bR, bRY, bT, bB) ~ dnorm (0, 0.3)
+    logit (p) <- aY [Year] + bR * RingWidth + bRY * RingWidth * Year + aT [TOP] + aB [BRANCH],
+    aY [Year] ~ dnorm (0, 0.9),
+    aB [BRANCH] ~ dnorm (0, 0.9),
+    aT [TOP] ~ dnorm (0, 0.9),
+    c (bR, bRY) ~ dnorm (0, 0.3)
   ), data = H2Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
 )
 #trankplot (H2m6)
 #traceplot (H2m6)
 precis (H2m6, depth = 2, prob = 0.9)
-compare (H2m1, H2m2, H2m3, H2m4, H2m5, H2m6, func = 'WAIC')
-
-
-# Selection of years with high intercepts
-#----------------------------------------------------------------------------------------
-IADFproneYears <- c (1999, 2002, 2012, 2013, 2016)
-IADFproneYearIndices <- c (4, 7, 17, 18, 21)
+set.seed (1353)
+H2m7 <- ulam (
+  alist (
+    densityAnomaly ~ dbinom (1, p),
+    logit (p) <- aY [Year] + bR * RingWidth + aT [TOP] + aB [BRANCH],
+    aY [Year] ~ dnorm (0, 0.9),
+    aB [BRANCH] ~ dnorm (0, 0.9),
+    aT [TOP] ~ dnorm (0, 0.9),
+    bR ~ dnorm (0, 0.3)
+  ), data = H2Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
+)
+#trankplot (H2m7)
+#traceplot (H2m7)
+precis (H2m7, depth = 2, prob = 0.9)
+compare (H2mBRA, H2mTOP, H2mYEAR, H2mRW, H2m2, H2m3, H2m4, H2m5, H2m6, H2m7, func = 'WAIC')
 
 # Calculate the effect on posterior probability of being near a branch ot at the top of 
 # the tree in years with many IADFs
 #----------------------------------------------------------------------------------------
 set.seed (1353)
 postH2 <- extract.samples (H2m6)
-effect_BRA <- inv_logit (apply (postH2$aY [, IADFproneYearIndices], 1, mean) + 
-                           postH2$bR * 0 + # mean ring width is 0 as the distribution was centred and scaled
-                           postH2$bRY * 0 * 1.0 + # mean ring width is 0 as the distribution was centred and scaled
-                           postH2$bB * 1.0 + 
-                           postH2$bT * 0.0) - 
+effect_TOP <- 
   inv_logit (apply (postH2$aY [, IADFproneYearIndices], 1, mean) + 
-             postH2$bR * 0 + 
-             postH2$bRY * 0 * 1.0 + 
-             postH2$bB * 0.0 + 
-             postH2$bT * 0.0)
-mean (effect_BRA)
-PI (effect_BRA, prob = 0.9)
-effect_TOP <- inv_logit (apply (postH2$aY [, IADFproneYearIndices], 1, mean) + 
-                         postH2$bR * 0 + 
-                         postH2$bRY * 0 * 1.0 + 
-                         postH2$bB * 0.0 + 
-                         postH2$bT * 1.0) - 
+               postH2$bR * 0 + # mean ring width is 0 as the distribution was centred and scaled
+               postH2$bRY * 0 * 1.0 + # mean ring width is 0 as the distribution was centred and scaled
+               postH2$aB [,1] + 
+               postH2$aT [,2]) - 
   inv_logit (apply (postH2$aY [, IADFproneYearIndices], 1, mean) + 
-             postH2$bR * 0 + 
-             postH2$bRY * 0 * 1.0 + 
-             postH2$bB * 0.0 + 
-             postH2$bT * 0.0)
+               postH2$bR * 0 + 
+               postH2$bRY * 0 * 1.0 + 
+               postH2$aB [,1] + 
+               postH2$aT [,1])
 mean (effect_TOP)
 PI (effect_TOP, prob = 0.9)
+effect_TOP <- 
+  inv_logit (apply (postH2$aY [, -IADFproneYearIndices], 1, mean) + 
+               postH2$bR * 0 + # mean ring width is 0 as the distribution was centred and scaled
+               postH2$bRY * 0 * 1.0 + # mean ring width is 0 as the distribution was centred and scaled
+               postH2$aB [,1] + 
+               postH2$aT [,2]) - 
+  inv_logit (apply (postH2$aY [, -IADFproneYearIndices], 1, mean) + 
+               postH2$bR * 0 + 
+               postH2$bRY * 0 * 1.0 + 
+               postH2$aB [,1] + 
+               postH2$aT [,1])
+mean (effect_TOP)
+PI (effect_TOP, prob = 0.9)
+effect_BRA <- 
+  inv_logit (apply (postH2$aY [, IADFproneYearIndices], 1, mean) + 
+             postH2$bR * 0 + # mean ring width is 0 as the distribution was centred and scaled
+             postH2$bRY * 0 * 1.0 + # mean ring width is 0 as the distribution was centred and scaled
+             postH2$aB [,2] + 
+             postH2$aT [,1]) - 
+  inv_logit (apply (postH2$aY [, IADFproneYearIndices], 1, mean) + 
+             postH2$bR * 0 + 
+             postH2$bRY * 0 * 1.0 + 
+             postH2$aB [,1] + 
+             postH2$aT [,1])
+mean (effect_BRA)
+PI (effect_BRA, prob = 0.9)
+effect_BRA <- 
+  inv_logit (apply (postH2$aY [, -IADFproneYearIndices], 1, mean) + 
+               postH2$bR * 0 + # mean ring width is 0 as the distribution was centred and scaled
+               postH2$bRY * 0 * 1.0 + # mean ring width is 0 as the distribution was centred and scaled
+               postH2$aB [,2] + 
+               postH2$aT [,1]) - 
+  inv_logit (apply (postH2$aY [, -IADFproneYearIndices], 1, mean) + 
+               postH2$bR * 0 + 
+               postH2$bRY * 0 * 1.0 + 
+               postH2$aB [,1] + 
+               postH2$aT [,1])
+mean (effect_BRA)
+PI (effect_BRA, prob = 0.9)
+effect_RW <- 
+  inv_logit (apply (postH2$aY [, IADFproneYearIndices], 1, mean) + 
+               postH2$bR * 0.4775436 + 
+               postH2$bRY * 0.4775436 * 1.0 + 
+               postH2$aB [,1] + 
+               postH2$aT [,1]) - 
+  inv_logit (apply (postH2$aY [, IADFproneYearIndices], 1, mean) + 
+               postH2$bR * -0.4780113 + 
+               postH2$bRY * -0.4780113 * 1.0 + 
+               postH2$aB [,1] + 
+               postH2$aT [,1])
+mean (effect_RW)
+PI (effect_RW, prob = 0.9)
+
+# Wrangle data into tibble for plotting
+#----------------------------------------------------------------------------------------
+dataF2 <- cbind (inv_logit (apply (postH2$aY [, IADFproneYearIndices], 1, mean) + 
+                            postH2$bR * -0.4780113 + 
+                            postH2$bRY * -0.4780113 * 1.0 + 
+                            postH2$aB [,1] + 
+                            postH2$aT [,1]),
+                 inv_logit (apply (postH2$aY [, IADFproneYearIndices], 1, mean) + 
+                            postH2$bR * 0.4775436 + 
+                            postH2$bRY * 0.4775436 * 1.0 + 
+                            postH2$aB [,1] + 
+                            postH2$aT [,1]),
+                 inv_logit (apply (postH2$aY [, -IADFproneYearIndices], 1, mean) + 
+                            postH2$bR * -0.4780113 + 
+                            postH2$bRY * -0.4780113 * 1.0 + 
+                            postH2$aB [,1] + 
+                            postH2$aT [,1]),
+                 inv_logit (apply (postH2$aY [, -IADFproneYearIndices], 1, mean) + 
+                            postH2$bR * 0.4775436 + 
+                            postH2$bRY * 0.4775436 * 1.0 + 
+                            postH2$aB [,1] + 
+                            postH2$aT [,1]),
+                 inv_logit (apply (postH2$aY [, IADFproneYearIndices], 1, mean) + 
+                            postH2$bR * 0 + 
+                            postH2$bRY * 0 * 1.0 + 
+                            postH2$aB [,1] + 
+                            postH2$aT [,1]),
+                 inv_logit (apply (postH2$aY [, IADFproneYearIndices], 1, mean) + 
+                            postH2$bR * 0 + 
+                            postH2$bRY * 0 * 1.0 + 
+                            postH2$aB [,2] + 
+                            postH2$aT [,1]),
+                 inv_logit (apply (postH2$aY [, -IADFproneYearIndices], 1, mean) + 
+                            postH2$bR * 0 + 
+                            postH2$bRY * 0 * 1.0 + 
+                            postH2$aB [,1] + 
+                            postH2$aT [,1]),
+                 inv_logit (apply (postH2$aY [, -IADFproneYearIndices], 1, mean) + 
+                            postH2$bR * 0 + 
+                            postH2$bRY * 0 * 1.0 + 
+                            postH2$aB [,2] + 
+                            postH2$aT [,1]),
+                 inv_logit (apply (postH2$aY [, IADFproneYearIndices], 1, mean) + 
+                            postH2$bR * 0 + 
+                            postH2$bRY * 0 * 1.0 + 
+                            postH2$aB [,1] + 
+                            postH2$aT [,1]),
+                 inv_logit (apply (postH2$aY [, IADFproneYearIndices], 1, mean) + 
+                            postH2$bR * 0 + 
+                            postH2$bRY * 0 * 1.0 + 
+                            postH2$aB [,1] + 
+                            postH2$aT [,2]), 
+                 inv_logit (apply (postH2$aY [, -IADFproneYearIndices], 1, mean) + 
+                            postH2$bR * 0 + 
+                            postH2$bRY * 0 * 1.0 + 
+                            postH2$aB [,1] + 
+                            postH2$aT [,1]),
+                 inv_logit (apply (postH2$aY [, -IADFproneYearIndices], 1, mean) + 
+                            postH2$bR * 0 + 
+                            postH2$bRY * 0 * 1.0 + 
+                            postH2$aB [,1] + 
+                            postH2$aT [,2]))
+
+# Plot the effect of ring width, TOP and BRANCH on the probability of occurence of IADFs 
+#----------------------------------------------------------------------------------------
+png (file = './fig/probabilityOfOccurrence.png', width = 700, height = 400)
+vioplot (x = dataF2 [, 1], at = rep (1, 2000), xlim = c (0, 9), ylim = c (0, 1),
+         xlab = '', ylab = '', 
+         col = addOpacity (colours [1], 0.5), xaxt = 'n', yaxt = 'n', 
+         border = colours [1], axes = FALSE,
+         lineCol = '#222222', rectCol = '#444444', colMed = '#666666', lwd = 2)
+axis (side = 2, las = 1)
+mtext (side = 2, line = 3, text = 'Probability of occurrence')
+vioplot (x = dataF2 [, 2], at = rep (2, 2000), 
+         xlab = '', ylab = '', add = TRUE,
+         col = addOpacity (colours [1], 0.5), xaxt = 'n', yaxt = 'n', 
+         border = colours [1], axes = FALSE,
+         lineCol = '#222222', rectCol = '#444444', colMed = '#666666', lwd = 2)
+vioplot (x = dataF2 [, 3], at = rep (1, 2000), add = TRUE,
+         col = addOpacity (colours [1], 0.1), 
+         border = colours [1], axes = FALSE,
+         lineCol = '#888888', rectCol = '#999999', colMed = '#aaaaaa', lwd = 2)
+vioplot (x = dataF2 [, 4], at = rep (2, 2000), add = TRUE,
+         col = addOpacity (colours [1], 0.1), 
+         border = colours [1], axes = FALSE,
+         lineCol = '#888888', rectCol = '#999999', colMed = '#aaaaaa', lwd = 2)
+axis (side = 1, at = 1:2, labels = c ('3.5 mm', '5.5 mm'))
+vioplot (x = dataF2 [, 5], at = rep (4, 2000), xlim = c (0, 14), ylim = c (0, 1),
+         xlab = '', ylab = '', add = TRUE,
+         col = addOpacity (colours [2], 0.4), xaxt = 'n', yaxt = 'n', 
+         border = colours [2], axes = FALSE,
+         lineCol = '#222222', rectCol = '#444444', colMed = '#666666', lwd = 2)
+vioplot (x = dataF2 [, 6], at = rep (5, 2000), xlim = c (0, 14), ylim = c (0, 1),
+         xlab = '', ylab = '', add = TRUE,
+         col = addOpacity (colours [2], 0.4), xaxt = 'n', yaxt = 'n', 
+         border = colours [2], axes = FALSE,
+         lineCol = '#222222', rectCol = '#444444', colMed = '#666666', lwd = 2)
+vioplot (x = dataF2 [, 7], at = rep (4, 2000), add = TRUE,
+         col = addOpacity (colours [2], 0.1), 
+         border = colours [2], axes = FALSE,
+         lineCol = '#888888', rectCol = '#999999', colMed = '#aaaaaa', lwd = 2)
+vioplot (x = dataF2 [, 8], at = rep (5, 2000), add = TRUE,
+         col = addOpacity (colours [2], 0.1), 
+         border = colours [2], axes = FALSE,
+         lineCol = '#888888', rectCol = '#999999', colMed = '#aaaaaa', lwd = 2)
+axis (side = 1, at = 4:5, labels = c ('No branch', 'Branch'))
+vioplot (x = dataF2 [, 9], at = rep (7, 2000), xlim = c (0, 14), ylim = c (0, 1),
+         xlab = '', ylab = '', add = TRUE,
+         col = addOpacity (colours [3], 0.4), xaxt = 'n', yaxt = 'n', 
+         border = colours [3], axes = FALSE,
+         lineCol = '#222222', rectCol = '#444444', colMed = '#666666', lwd = 2)
+vioplot (x = dataF2 [, 10], at = rep (8, 2000), xlim = c (0, 14), ylim = c (0, 1),
+         xlab = '', ylab = '', add = TRUE,
+         col = addOpacity (colours [3], 0.4), xaxt = 'n', yaxt = 'n', 
+         border = colours [3], axes = FALSE,
+         lineCol = '#222222', rectCol = '#444444', colMed = '#666666', lwd = 2)
+vioplot (x = dataF2 [, 11], at = rep (7, 2000), add = TRUE,
+         col = addOpacity (colours [3], 0.1), 
+         border = colours [3], axes = FALSE,
+         lineCol = '#888888', rectCol = '#999999', colMed = '#aaaaaa', lwd = 2)
+vioplot (x = dataF2 [, 12], at = rep (8, 2000), add = TRUE,
+         col = addOpacity (colours [3], 0.1), 
+         border = colours [3], axes = FALSE,
+         lineCol = '#888888', rectCol = '#999999', colMed = '#aaaaaa', lwd = 2)
+axis (side = 1, at = 7:8, labels = c ('BH', 'Top'))
+dev.off ()
+
+# Calculate the effect on posterior probability of being near a branch ot at the top of 
+# the tree in years with many IADFs
+#----------------------------------------------------------------------------------------
+set.seed (1353)
+postH2 <- extract.samples (H2m7)
+
+# Wrangle data into tibble for plotting
+#----------------------------------------------------------------------------------------
+dataF2 <- cbind (inv_logit (apply (postH2$aY [, IADFproneYearIndices], 1, mean) + 
+                              postH2$bR * -0.4780113 + 
+                              postH2$aB [,1] + 
+                              postH2$aT [,1]),
+                 inv_logit (apply (postH2$aY [, IADFproneYearIndices], 1, mean) + 
+                              postH2$bR * 0.4775436 + 
+                              postH2$aB [,1] + 
+                              postH2$aT [,1]),
+                 inv_logit (apply (postH2$aY [, -IADFproneYearIndices], 1, mean) + 
+                              postH2$bR * -0.4780113 + 
+                              postH2$aB [,1] + 
+                              postH2$aT [,1]),
+                 inv_logit (apply (postH2$aY [, -IADFproneYearIndices], 1, mean) + 
+                              postH2$bR * 0.4775436 + 
+                              postH2$aB [,1] + 
+                              postH2$aT [,1]),
+                 inv_logit (apply (postH2$aY [, IADFproneYearIndices], 1, mean) + 
+                              postH2$bR * 0 + 
+                              postH2$aB [,1] + 
+                              postH2$aT [,1]),
+                 inv_logit (apply (postH2$aY [, IADFproneYearIndices], 1, mean) + 
+                              postH2$bR * 0 + 
+                              postH2$aB [,2] + 
+                              postH2$aT [,1]),
+                 inv_logit (apply (postH2$aY [, -IADFproneYearIndices], 1, mean) + 
+                              postH2$bR * 0 + 
+                              postH2$aB [,1] + 
+                              postH2$aT [,1]),
+                 inv_logit (apply (postH2$aY [, -IADFproneYearIndices], 1, mean) + 
+                              postH2$bR * 0 + 
+                              postH2$aB [,2] + 
+                              postH2$aT [,1]),
+                 inv_logit (apply (postH2$aY [, IADFproneYearIndices], 1, mean) + 
+                              postH2$bR * 0 + 
+                              postH2$aB [,1] + 
+                              postH2$aT [,1]),
+                 inv_logit (apply (postH2$aY [, IADFproneYearIndices], 1, mean) + 
+                              postH2$bR * 0 + 
+                              postH2$aB [,1] + 
+                              postH2$aT [,2]), 
+                 inv_logit (apply (postH2$aY [, -IADFproneYearIndices], 1, mean) + 
+                              postH2$bR * 0 + 
+                              postH2$aB [,1] + 
+                              postH2$aT [,1]),
+                 inv_logit (apply (postH2$aY [, -IADFproneYearIndices], 1, mean) + 
+                              postH2$bR * 0 + 
+                              postH2$aB [,1] + 
+                              postH2$aT [,2]))
+
+# Plot the effect of ring width, TOP and BRANCH on the probability of occurence of IADFs 
+#----------------------------------------------------------------------------------------
+png (file = './fig/probabilityOfOccurrenceWithoutRYInteraction.png', width = 700, height = 400)
+vioplot (x = dataF2 [, 1], at = rep (1, 2000), xlim = c (0, 9), ylim = c (0, 1),
+         xlab = '', ylab = '', 
+         col = addOpacity (colours [1], 0.5), xaxt = 'n', yaxt = 'n', 
+         border = colours [1], axes = FALSE,
+         lineCol = '#222222', rectCol = '#444444', colMed = '#666666', lwd = 2)
+axis (side = 2, las = 1)
+mtext (side = 2, line = 3, text = 'Probability of occurrence')
+vioplot (x = dataF2 [, 2], at = rep (2, 2000), 
+         xlab = '', ylab = '', add = TRUE,
+         col = addOpacity (colours [1], 0.5), xaxt = 'n', yaxt = 'n', 
+         border = colours [1], axes = FALSE,
+         lineCol = '#222222', rectCol = '#444444', colMed = '#666666', lwd = 2)
+vioplot (x = dataF2 [, 3], at = rep (1, 2000), add = TRUE,
+         col = addOpacity (colours [1], 0.1), 
+         border = colours [1], axes = FALSE,
+         lineCol = '#888888', rectCol = '#999999', colMed = '#aaaaaa', lwd = 2)
+vioplot (x = dataF2 [, 4], at = rep (2, 2000), add = TRUE,
+         col = addOpacity (colours [1], 0.1), 
+         border = colours [1], axes = FALSE,
+         lineCol = '#888888', rectCol = '#999999', colMed = '#aaaaaa', lwd = 2)
+axis (side = 1, at = 1:2, labels = c ('3.5 mm', '5.5 mm'))
+vioplot (x = dataF2 [, 5], at = rep (4, 2000), xlim = c (0, 14), ylim = c (0, 1),
+         xlab = '', ylab = '', add = TRUE,
+         col = addOpacity (colours [2], 0.4), xaxt = 'n', yaxt = 'n', 
+         border = colours [2], axes = FALSE,
+         lineCol = '#222222', rectCol = '#444444', colMed = '#666666', lwd = 2)
+vioplot (x = dataF2 [, 6], at = rep (5, 2000), xlim = c (0, 14), ylim = c (0, 1),
+         xlab = '', ylab = '', add = TRUE,
+         col = addOpacity (colours [2], 0.4), xaxt = 'n', yaxt = 'n', 
+         border = colours [2], axes = FALSE,
+         lineCol = '#222222', rectCol = '#444444', colMed = '#666666', lwd = 2)
+vioplot (x = dataF2 [, 7], at = rep (4, 2000), add = TRUE,
+         col = addOpacity (colours [2], 0.1), 
+         border = colours [2], axes = FALSE,
+         lineCol = '#888888', rectCol = '#999999', colMed = '#aaaaaa', lwd = 2)
+vioplot (x = dataF2 [, 8], at = rep (5, 2000), add = TRUE,
+         col = addOpacity (colours [2], 0.1), 
+         border = colours [2], axes = FALSE,
+         lineCol = '#888888', rectCol = '#999999', colMed = '#aaaaaa', lwd = 2)
+axis (side = 1, at = 4:5, labels = c ('No branch', 'Branch'))
+vioplot (x = dataF2 [, 9], at = rep (7, 2000), xlim = c (0, 14), ylim = c (0, 1),
+         xlab = '', ylab = '', add = TRUE,
+         col = addOpacity (colours [3], 0.4), xaxt = 'n', yaxt = 'n', 
+         border = colours [3], axes = FALSE,
+         lineCol = '#222222', rectCol = '#444444', colMed = '#666666', lwd = 2)
+vioplot (x = dataF2 [, 10], at = rep (8, 2000), xlim = c (0, 14), ylim = c (0, 1),
+         xlab = '', ylab = '', add = TRUE,
+         col = addOpacity (colours [3], 0.4), xaxt = 'n', yaxt = 'n', 
+         border = colours [3], axes = FALSE,
+         lineCol = '#222222', rectCol = '#444444', colMed = '#666666', lwd = 2)
+vioplot (x = dataF2 [, 11], at = rep (7, 2000), add = TRUE,
+         col = addOpacity (colours [3], 0.1), 
+         border = colours [3], axes = FALSE,
+         lineCol = '#888888', rectCol = '#999999', colMed = '#aaaaaa', lwd = 2)
+vioplot (x = dataF2 [, 12], at = rep (8, 2000), add = TRUE,
+         col = addOpacity (colours [3], 0.1), 
+         border = colours [3], axes = FALSE,
+         lineCol = '#888888', rectCol = '#999999', colMed = '#aaaaaa', lwd = 2)
+axis (side = 1, at = 7:8, labels = c ('BH', 'Top'))
+dev.off ()
+
+# Evaluate ring width effect if only breast height samples are considered
+#----------------------------------------------------------------------------------------
+muPrior <- longData %>% filter (!TOP & !BRANCH) %>% select (RingWidth) %>% 
+  summarise (mean = mean (RingWidth, na.rm = TRUE)) %>% unlist ()
+sigmaPrior <- longData %>% filter (!TOP & !BRANCH) %>% select (RingWidth) %>% 
+  summarise (sd = sd (RingWidth, na.rm = TRUE)) %>% unlist ()
+H2Data <- longData %>% filter (!TOP & !BRANCH) %>% 
+  select (-TreeID, -WoodAge,-Pos1, -Pos2, -PosPer) %>%
+  mutate (Year = as.integer (as_factor (Year)),
+          TOP = as.integer (as_factor (TOP)),
+          BRANCH = as.integer (as_factor (BRANCH)),
+          RingWidth = (RingWidth - muPrior [[1]]) / sigmaPrior [[1]]) %>% 
+  drop_na ()
+
+# Fit a logistic model to test whether ring widths, year of occurrence, being at the top 
+# of the tree and/or near a branch affects the likelihood of formation of an IADFS
+#----------------------------------------------------------------------------------------
+set.seed (1353)
+H2mYEAR <- ulam (
+  alist (
+    densityAnomaly ~ dbinom (1, p),
+    logit (p) <-  aY [Year],
+    aY [Year] ~ dnorm (0, 1.5) # this is a pretty flat (uninformative prior)
+  ), data = H2Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
+)
+#trankplot (H2mYEAR)
+#traceplot (H2mYEAR)
+#precis (H2mYEAR, depth = 2, prob = 0.9)
+set.seed (1353)
+H2mRW <- ulam (
+  alist (
+    densityAnomaly ~ dbinom (1, p),
+    logit (p) <- bR * RingWidth,
+    bR ~ dnorm (0, 0.5)
+  ), data = H2Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
+)
+#trankplot (H2mRW)
+#traceplot (H2mRW)
+#precis (H2mRW, depth = 2, prob = 0.9)
+set.seed (1353)
+postH2mRW <- extract.samples (H2mRW)
+effect_3.5RW5.5 <- 
+  inv_logit (postH2mRW$bR * 0.4775436) - 
+  inv_logit (postH2mRW$bR * -0.4780113)
+mean (effect_3.5RW5.5)
+PI (effect_3.5RW5.5, prob = 0.9)
+
+set.seed (1353)
+H2m2 <- ulam (
+  alist (
+    densityAnomaly ~ dbinom (1, p),
+    logit (p) <- aY [Year] + bR * RingWidth,
+    aY [Year] ~ dnorm (0, 1.5),
+    bR ~ dnorm (0, 0.5)
+  ), data = H2Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
+)
+#trankplot (H2m2)
+#traceplot (H2m2)
+#precis (H2m2, depth = 2, prob = 0.9)
+set.seed (1353)
+postH2mRWY <- extract.samples (H2m2)
+effect_3.5RWY5.5 <- 
+  inv_logit (apply (postH2mRWY$aY [, IADFproneYearIndices], 1, mean) + 
+               postH2mRWY$bR * 0.4775436) - 
+  inv_logit (apply (postH2mRWY$aY [, IADFproneYearIndices], 1, mean) + 
+               postH2mRWY$bR * -0.4780113)
+mean (effect_3.5RWY5.5)
+PI (effect_3.5RWY5.5, prob = 0.9)
+effect_3.5RWY5.5 <- 
+  inv_logit (apply (postH2mRWY$aY [, -IADFproneYearIndices], 1, mean) + 
+               postH2mRWY$bR * 0.4775436) - 
+  inv_logit (apply (postH2mRWY$aY [, -IADFproneYearIndices], 1, mean) + 
+               postH2mRWY$bR * -0.4780113)
+mean (effect_3.5RWY5.5)
+PI (effect_3.5RWY5.5, prob = 0.9)
+
+set.seed (1353)
+H2m3 <- ulam (
+  alist (
+    densityAnomaly ~ dbinom (1, p),
+    logit (p) <- aY [Year] + bR * RingWidth + bRY * RingWidth * Year,
+    aY [Year] ~ dnorm (0, 1.5),
+    c (bR, bRY) ~ dnorm (0, 0.3)
+  ), data = H2Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
+)
+#trankplot (H2m3)
+#traceplot (H2m3)
+#precis (H2m3, depth = 2, prob = 0.9)
+compare (H2m3, H2m2, H2mRW, H2mYEAR)
 
 #----------------------------------------------------------------------------------------
 # Wrangle data to test (H3) about difference in the circumferential arc and/or the length
@@ -330,87 +795,90 @@ H3Data <- H3Data %>% mutate (LenStd = (Len - muLen) / sigmaLen) %>% ungroup ()
 # Simulate some data to make sure the test works fine
 #----------------------------------------------------------------------------------------
 set.seed (1353)
-sigmaA <- rexp (1e3, 1)
-h <- sample.int (2, 1e3, replace = TRUE)
-aH <- rnorm (1e3, 1.74, 0.34)
-a0 <- rnorm (1e3, 1.74, 0.34)
+N <- 1e2
+kappaA <- rexp (n = N, rate = 1)
+h <- sample.int (n = 2, size = N, replace = TRUE)
+aH <- rnorm (n = N, mean = 1.74, sd = 0.34)
+a0 <- rnorm (n = N, mean = 1.74, sd = 0.34)
 muA <- a0 + aH *(h-1)
-Arc <- rnorm (1e3, muA, sigmaA)
+Arc <- rnorm (n = N, mean = muA, sd = sigmaA)
 
 H3m1 <- stan (
   file = 'codeH3m1.stan', # Stan program
-  data = list (h = h, Arc = Arc), # named list of data with arc in radians from -pi to pi
+  data = list (h = h, Arc = Arc, N = N), # named list of data with arc in radians from -pi to pi
   chains = 1,             # number of Markov chains
   warmup = 1000,          # number of warmup iterations per chain
   iter = 2000,            # total number of iterations per chain
-  cores = 4,              # number of cores (could use one per chain)
+  cores = 1,              # number of cores (could use one per chain)
   refresh = 0             # no progress shown
 )
 precis (H3m1, depth = 2, prob = 0.9)
+# Assuming that the model assumptions are correct, the model works fine with sample sizes 
+# of 1e4 but starts to struggle around 1e3  and below that even with a difference of 100 
+# degrees between heights.
 
 # Test hypothesis (H3) about the conservation of the circumferential arc of IADFs
 #----------------------------------------------------------------------------------------
 set.seed (42)
 H3m1 <- stan (
   file = 'codeH3m1.stan', # Stan program
-  data = H3Data %>% select (-Year, -TreeID, -ArcStd, -Len, -LenStd, -RingWidth) %>%
-    mutate (h = ifelse (h == 'TOP', 1, 2), 
-            Arc = (Arc * pi / 180) - pi), # named list of data with arc in radians from -pi to pi
+  data = list (h = H3Data %>% select (h) %>%
+    mutate (h = as.integer (ifelse (h == 'TOP', 2, 1))) %>% unlist (), 
+               Arc = H3Data %>% select (Arc) %>%
+      mutate (Arc = Arc / 180 * pi - pi) %>% unlist (),
+            N = dim (H3Data) [1]), # named list of data with arc in radians from -pi to pi
   chains = 4,             # number of Markov chains
-  warmup = 2000,          # number of warmup iterations per chain
-  iter = 4000,            # total number of iterations per chain
+  warmup = 3000,          # number of warmup iterations per chain
+  iter = 8000,            # total number of iterations per chain
   cores = 4,              # number of cores (could use one per chain)
   refresh = 0             # no progress shown
 )
-postArc <- extract.samples (H3m1)
-trankplot (H3m1)
-traceplot (H3m1)
+#trankplot (H3m1)
+#traceplot (H3m1)
 precis (H3m1, depth = 2)
-
-H3m1years <- ulam (
-  alist (
-    ArcStd ~ dnorm (muA, sigmaA),
-    muA <- a0 [Year] + aH [h],
-    a0 [Year] ~ dnorm (0, 10),
-    bH ~ dnorm (0, 10),
-    sigmaA ~ dexp (1)
-  ), data = H3Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
-)
-H3m1trees <- ulam (
-  alist (
-    ArcStd ~ dnorm (muA, sigmaA),
-    muA <- a0 [TreeID] + aH * [h],
-    a0 [TreeID] ~ dnorm (0, 10),
-    bH ~ dnorm (0, 10),
-    sigmaA ~ dexp (1)
-  ), data = H3Data, chains = 4, cores = 4, cmdstan = TRUE, log_lik = TRUE
-)
-compare (H3m1, H3m1years, H3m1trees, func = 'WAIC')
-# We tested whether this remains true if either TreeID or Year are included as intercepts 
-# (commentted lines of code), but neither changes the results qualitatively.
-trankplot (H3m1years)
-traceplot (H3m1years)
-precis (H3m1years, depth = 2)
-precis (H3m1trees, depth = 2)
+# Conclusion: We really have too few samples to reliably estimate the posterior 
+# distribution for a von Mises distribution!
 
 # Test hypothesis (H3) about the conservation of the length of arc of IADFs
 #----------------------------------------------------------------------------------------
-H3m2years <- ulam (
+H3m0 <- ulam (
   alist (
     LenStd ~ dnorm (muA, sigmaA),
-    muA <- a0 [Year] + bH * h,
-    a0 [Year] ~ dnorm (0, 10),
-    bH ~ dnorm (0, 10),
+    muA <- aH [h],
+    aH [h] ~ dnorm (0, 10),
     sigmaA ~ dexp (1)
-  ), data = H3Data, chains = 4, cores = 4, cmdstan = TRUE,
+  ), data = H3Data, chains = 4, cores = 4, cmdstan = TRUE, iter = 4000, warmup = 2000,
 )
-trankplot (H3m2years)
-traceplot (H3m2years)
-precis (H3m2years, depth = 2)
+trankplot (H3m0)
+traceplot (H3m0)
+precis (H3m0, depth = 2)
+H3m1 <- ulam (
+  alist (
+    LenStd ~ dnorm (muA, sigmaA),
+    muA <- aY [Year] + aH [h],
+    aY [Year] ~ dnorm (0, 10),
+    aH [h] ~ dnorm (0, 10),
+    sigmaA ~ dexp (1)
+  ), data = H3Data, chains = 4, cores = 4, cmdstan = TRUE, iter = 4000, warmup = 2000,
+)
+trankplot (H3m1)
+traceplot (H3m1)
+precis (H3m1, depth = 2)
+H3m2 <- ulam (
+  alist (
+    LenStd ~ dnorm (muA, sigmaA),
+    muA <- aT [TreeID] + aH [h],
+    aT [TreeID] ~ dnorm (0, 10),
+    aH [h] ~ dnorm (0, 10),
+    sigmaA ~ dexp (1)
+  ), data = H3Data, chains = 4, cores = 4, cmdstan = TRUE, iter = 4000, warmup = 2000,
+)
+trankplot (H3m2)
+traceplot (H3m2)
+precis (H3m2, depth = 2)
 
-# Extract posterior distributions and to draw figures of arc and length of arc
+# Extract posterior distributions and to draw figures of the length of arc
 #----------------------------------------------------------------------------------------
-postArc <- extract.samples (H3m1years)
 postLen <- extract.samples (H3m2years)
 
 
